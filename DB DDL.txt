@@ -1,0 +1,68 @@
+CREATE DATABASE IMDB;
+
+USE IMDB;
+
+CREATE TABLE movie_basics(
+    tconst CHAR(9),
+    titleType VARCHAR(255),
+    primaryTitle VARCHAR(255),
+    originalTitle VARCHAR(255),
+    isAdult DECIMAL(2,1),
+    startYear INT,
+    endYear INT,
+    runtimeMinutes INT,
+    genres VARCHAR(255),
+    PRIMARY KEY (tconst),
+    CHECK (isAdult IN (0.0, 1.0))
+);
+
+
+CREATE TABLE ratings(
+ tconst CHAR(9),
+ averageRating DECIMAL(2, 1),
+ numVotes INT,
+ PRIMARY KEY (tconst),
+ FOREIGN KEY (tconst) REFERENCES movie_basics (tconst)
+);
+
+
+CREATE TABLE principals(
+ tconst VARCHAR(9),
+ ordering INT,
+ nconst VARCHAR(9),
+ category VARCHAR(255),
+ characters VARCHAR(255),
+ PRIMARY KEY (nconst),
+ FOREIGN KEY (tconst) REFERENCES movie_basics (tconst)
+);
+
+
+CREATE TABLE akas(
+ titleID VARCHAR(9),
+ ordering INT,
+ title VARCHAR(255),
+ region VARCHAR(2),
+ language VARCHAR(3),
+ isOriginalTitle INT,
+ PRIMARY KEY (titleID, ordering),
+ FOREIGN KEY (titleID) REFERENCES movie_basics(tconst)
+);
+
+CREATE TABLE name_basics(
+ nconst VARCHAR(9),
+ primaryName VARCHAR(255),
+ birthyear INT,
+ deathyear INT,
+ primaryProfession VARCHAR(255),
+ knownForTitles VARCHAR(255),
+ PRIMARY KEY (nconst)
+);
+
+
+CREATE TABLE crew(
+    tconst VARCHAR(9),
+    directors VARCHAR(255),
+    writer VARCHAR(255),
+    PRIMARY KEY(tconst),
+    FOREIGN KEY(tconst) REFERENCES movie_basics (tconst)
+);
