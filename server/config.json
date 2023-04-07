@@ -1,9 +1,9 @@
 {
-  "rds_host": "database-1.cguuzxmvlnvo.us-east-2.rds.amazonaws.com",
+  "rds_host": "",
   "rds_port": "3306",
-  "rds_user": "shelly",
-  "rds_password" : "Renzilin10",
-  "rds_db": "IMDB",
+  "rds_user": "",
+  "rds_password" : "",
+  "rds_db": "",
   "server_host": "localhost",
   "server_port":"8080"
 }
