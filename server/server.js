@@ -13,6 +13,15 @@ app.use(cors({
 app.get('/author/:type', routes.author);
 app.get('/random', routes.random);
 app.get('/song/:song_id', routes.song);
+app.get('/search', routes.search);
+
+app.get('/type/:type', routes.get_type);
+app.get('/filter_movie', routes.filter_movie);
+app.get('/distinct_genres', routes.get_distinct_genres);
+app.get('/distinct_types', routes.get_distinct_types);
+app.get('/video/:tconst', routes.get_video_info);
+app.get('/video_crew/:tconst', routes.get_video_crew);
+app.get('/top5/:year/:type', routes.get_top5);
 
 app.listen(config.server_port, () => {
   console.log(`Server running at http://${config.server_host}:${config.server_port}/`)

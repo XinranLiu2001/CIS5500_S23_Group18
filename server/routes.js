@@ -66,8 +66,261 @@ const song = async function(req, res) {
   });
 }
 
+/**********************
+ * Basic routes
+ **********************/
+// Route 1: GET /search
+const search = async function(req, res) {
+  const search_text = req.query.text
+  connection.query(`
+  SELECT DISTINCT title FROM
+  (
+    (
+    SELECT titleId AS tconst, title AS title FROM akas
+    WHERE X LIKE '${search_text}'
+    )
+    UNION
+    (
+    SELECT tconst, primaryTitle AS title FROM movie_basics
+    WHERE X LIKE '${search_text}')
+  )
+  `, (err, data) => {
+      if(err || data.length === 0){
+        console.log(err);
+        res.json([]);
+      } else {
+        res.json(data);
+      }
+    });
+}
+
+// TODO: need to modify the query, we need abbreviate info for each movie to display
+//Route 2: Get /type/:type
+const get_type = async function (req, res){
+  const type = req.params.type
+  connection.query(`
+    SELECT tconst
+    FROM movie_basics
+    WHERE titleType = '${type}' AND startYear = 2022;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+//TODO: the query needs at least to display the movie's title
+//Route 3: GET /filter_movie
+//genre type: "a,b,c" 
+const filter_movie = async function (req, res){
+  const isAdult = req.query.isAdult ?? 0
+  const startYear = req.query.startYear ?? 2000
+  const endYear = req.query.endYear ?? 2023
+  const runtimeMinutesLow = req.query.runtimeMinutesLow ?? 60
+  const runtimeMinutesHigh = req.query.runtimeMinutesHigh ?? 120
+  const genres = req.query.genres ?? ''
+  if(genres === ''){
+  connection.query(`
+    SELECT tconst
+    FROM movie_basics
+    WHERE isAdult = ${isAdult}
+    AND startYear >= ${startYear}
+    AND endYear <= ${endYear}
+    AND runtimeMinutes >= ${runtimeMinutesLow}
+    AND runtimeMinutes <= ${runtimeMinutesHigh};
+  `, (err, data) => {
+      if(err || data.length === 0){
+        console.log(err);
+        res.json([]);
+      } else {
+        res.json(data);
+      }
+    });
+  } else {
+    genres_split = genres.split(',')
+    if(genres_split.length === 1){
+      connection.query(`
+      SELECT tconst
+      FROM movie_basics
+      WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
+      AND isAdult = ${isAdult}
+      AND startYear >= ${startYear}
+      AND endYear <= ${endYear}
+      AND runtimeMinutes >= ${runtimeMinutesLow}
+      AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    } else if(genres_split.length === 2){
+      connection.query(`
+      SELECT tconst
+      FROM movie_basics
+      WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
+      AND LOWER(genres) LIKE '%${genres_split[1]}%'
+      AND isAdult = ${isAdult}
+      AND startYear >= ${startYear}
+      AND endYear <= ${endYear}
+      AND runtimeMinutes >= ${runtimeMinutesLow}
+      AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    } else if(genres_split.length === 3){
+      connection.query(`
+      SELECT tconst
+      FROM movie_basics
+      WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
+      AND LOWER(genres) LIKE '%${genres_split[1]}%'
+      AND LOWER(genres) LIKE '%${genres_split[2]}%'
+      AND isAdult = ${isAdult}
+      AND startYear >= ${startYear}
+      AND endYear <= ${endYear}
+      AND runtimeMinutes >= ${runtimeMinutesLow}
+      AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    } else {
+      // we only have at most three genres for each movie, thus when having
+      // more than three genres, it is impossible for use to have any video fit the result
+      res.json([])
+    }
+  }
+}
+
+//Route 4: GET /distinct_genres
+const get_distinct_genres = async function (req, res){
+  connection.query(`
+    WITH separate_genres
+    AS
+    ((SELECT SUBSTRING_INDEX(genres, ',', 1) AS genre FROM movie_basics)
+        UNION
+    (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(genres,',', 2), ',',-1) AS genre FROM movie_basics)
+        UNION
+    (SELECT SUBSTRING_INDEX(genres, ',', -1) AS genre FROM movie_basics))
+    SELECT distinct(genre) FROM separate_genres WHERE genre IS NOT NULL;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+//Route 5: GET /distinct_types
+const get_distinct_types = async function (req, res){
+  connection.query(`
+    SELECT DISTINCT titleType FROM movie_basics;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+//Route 6: GET /video/:tconst
+const get_video_info = async function (req, res){
+  const tconst = req.params.tconst
+  connection.query(`
+    SELECT B.StartYear, B.EndYear, A.title, A.language, B.isAdult, B.titleType AS type FROM movie_basics B JOIN aka A
+    ON B.tconst = A.titleId WHERE B.tconst = ${tconst};
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+//Route 7: GET /video_crew/:tconst
+const get_video_crew = async function (req, res){
+  const tconst = req.params.tconst
+  connection.query(`
+  SELECT B.category, B.characters, C.primaryName, C.birthYear, C.deathYear FROM movie_basics A
+  JOIN principals B ON A.tconst = B.tconst
+  JOIN name_basics C ON B.nconst = C.nconst
+  WHERE A.tconst = '${tconst}'
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+// Route 8: GET /top5/:year/:type
+const get_top5 = async function (req, res){
+  const year = req.params.year
+  const type = req.params.type ?? ''
+  if(type === ''){
+    connection.query(`
+      SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+      JOIN rating rt ON mb.tconst = rt.tconst
+      WHERE mb.startYear = ${year} ORDER BY rt.averageRating DESC
+      LIMIT 5
+    `, (err, data) => {
+      if(err || data.length === 0){
+        console.log(err);
+        res.json([]);
+      } else {
+        res.json(data);
+      }
+    });
+  } else {
+    connection.query(`
+      SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+      JOIN rating rt ON mb.tconst = rt.tconst
+      WHERE mb.startYear = ${year} AND mb.titleType = '${type}' ORDER BY rt.averageRating DESC
+      LIMIT 5
+    `, (err, data) => {
+      if(err || data.length === 0){
+        console.log(err);
+        res.json([]);
+      } else {
+        res.json(data);
+      }
+    });
+  }
+}
+
+
 module.exports = {
   author,
   random,
-  song
+  song,
+  search,
+  get_type,
+  filter_movie,
+  get_distinct_genres,
+  get_distinct_types,
+  get_video_info,
+  get_video_crew,
+  get_top5
 }
