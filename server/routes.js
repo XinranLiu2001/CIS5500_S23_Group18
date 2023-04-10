@@ -14,56 +14,14 @@ connection.connect((err) => err && console.log(err));
 
 // Route 1: GET /author/:type
 const author = async function(req, res) {
-  const name = 'XX';
-  const pennKey = 'XXXX';
+  const name = 'Team18';
 
   if (req.params.type === 'name') {
     // res.send returns data back to the requester via an HTTP response
     res.send(`Created by ${name}`);
-  } else if (req.params.type === 'pennkey') {
-    res.send(`Created by ${pennKey}`);
   } else {
-    res.status(400).send(`'${req.params.type}' is not a valid author type. Valid types are 'name' and 'pennkey'.`);
+    res.status(400).send(`'${req.params.type}' is not a valid author type. `);
   }
-}
-
-// Route 2: GET /random
-const random = async function(req, res) {
-  const explicit = req.query.explicit === 'true' ? 1 : 0;
-
-  connection.query(`
-    SELECT *
-    FROM Songs
-    WHERE explicit <= ${explicit}
-    ORDER BY RAND()
-    LIMIT 1
-  `, (err, data) => {
-    if (err || data.length === 0) {
-      console.log(err);
-      res.json({});
-    } else {
-      res.json({
-        song_id: data[0].song_id,
-        title: data[0].title,
-      });
-    }
-  });
-}
-
-// Route 3: GET /song/:song_id
-const song = async function(req, res) {
-  connection.query(`
-    SELECT *
-    FROM Songs
-    WHERE song_id = '${req.params.song_id}';
-  `, (err, data) => {
-    if (err || data.length === 0) {
-      console.log(err);
-      res.json({});
-    } else {
-      res.json(data[0]);
-    }
-  });
 }
 
 /**********************
@@ -282,7 +240,7 @@ const get_top5 = async function (req, res){
   if(type === ''){
     connection.query(`
       SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
-      JOIN rating rt ON mb.tconst = rt.tconst
+      JOIN ratings rt ON mb.tconst = rt.tconst
       WHERE mb.startYear = ${year} ORDER BY rt.averageRating DESC
       LIMIT 5
     `, (err, data) => {
@@ -296,7 +254,7 @@ const get_top5 = async function (req, res){
   } else {
     connection.query(`
       SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
-      JOIN rating rt ON mb.tconst = rt.tconst
+      JOIN ratings rt ON mb.tconst = rt.tconst
       WHERE mb.startYear = ${year} AND mb.titleType = '${type}' ORDER BY rt.averageRating DESC
       LIMIT 5
     `, (err, data) => {
@@ -310,11 +268,92 @@ const get_top5 = async function (req, res){
   }
 }
 
+// Route 9: GET /top1000
+const get_top1000 = async function (req, res){
+  const page = req.query.page;
+  const pageSize = req.query.page_size ?? 10;
+
+  if (!page) {
+    connection.query(`
+      WITH C AS(
+      SELECT B.*, A.averageRating, A.numVotes FROM movie_basics B
+      INNER JOIN ratings A
+      ON B.tconst = A.tconst),
+      rs AS(
+      SELECT C.tconst, C.primaryTitle, C.titleType, C.averageRating, C.startYear, Rank() OVER(
+      Partition BY C.titleType, C.startYear
+      ORDER BY C.averageRating DESC) AS rn
+      FROM C)
+      SELECT rs.tconst, rs.primaryTitle, rs.titleType, rs.averageRating, rs.startYear, pr.nconst, pr.category
+      FROM rs
+      JOIN principals pr
+      ON rs.tconst = pr.tconst WHERE rs.rn <= 1000
+    `, (err, data) => {
+      if(err || data.length === 0){
+        console.log(err);
+        res.json([]);
+      } else {
+        res.json(data);
+      }
+    });
+  } else {
+    const offset = (page-1) * pageSize
+    connection.query(`
+      WITH C AS(
+      SELECT B.*, A.averageRating, A.numVotes FROM movie_basics B
+      INNER JOIN ratings A
+      ON B.tconst = A.tconst),
+      rs AS(
+      SELECT C.tconst, C.primaryTitle, C.titleType, C.averageRating, C.startYear, Rank() OVER(
+      Partition BY C.titleType, C.startYear
+      ORDER BY C.averageRating DESC) AS rn
+      FROM C)
+      SELECT rs.tconst, rs.primaryTitle, rs.titleType, rs.averageRating, rs.startYear, pr.nconst, pr.category
+      FROM rs
+      JOIN principals pr
+      ON rs.tconst = pr.tconst WHERE rs.rn <= 1000
+      LIMIT ${pageSize} OFFSET ${offset};
+    `, (err, data) => {
+      if(err || data.length === 0){
+        console.log(err);
+        res.json([]);
+      } else {
+        res.json(data);
+      }
+    });
+  }
+
+}
+
+// Route 10: GET /top1000
+const get_people = async function (req, res){
+  connection.query(`
+    WITH TMP_TABLE AS(
+    SELECT T2.primaryTitle AS MediaTitle, D.averageRating, T2.People, T2.PersonName,
+    T2.Age FROM
+    (SELECT T1.tconst, T1.primaryTitle, T1.isAdult, T1.category AS People, C.primaryName AS PersonName,
+    IF(C.deathYear IS NULL, 2023 - C.birthYear, C.deathYear - C.birthYear) AS age FROM
+    (SELECT A.tconst, A.primaryTitle, A.isAdult, A.startYear, B.category, B.nconst FROM movie_basics A
+    JOIN principals B ON A.tconst = B.tconst) T1
+    JOIN name_basics C ON C.nconst = T1.nconst
+    WHERE T1.category IN ('actress', 'actor') AND T1.isAdult = 0) T2 JOIN ratings D ON D.tconst = T2.tconst
+    WHERE D.averageRating > 5)
+    SELECT MediaTitle, averageRating, GROUP_CONCAT(PersonName SEPARATOR '; ') AS MainActorActress, AVG(age) AS Avg_age
+    FROM TMP_TABLE
+    GROUP BY MediaTitle, averageRating
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
 
 module.exports = {
   author,
-  random,
-  song,
   search,
   get_type,
   filter_movie,
@@ -322,5 +361,7 @@ module.exports = {
   get_distinct_types,
   get_video_info,
   get_video_crew,
-  get_top5
+  get_top5,
+  get_top1000,
+  get_people
 }
