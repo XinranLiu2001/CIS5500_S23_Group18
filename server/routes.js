@@ -57,9 +57,9 @@ const search = async function(req, res) {
 const get_type = async function (req, res){
   const type = req.params.type
   connection.query(`
-    SELECT tconst
+    SELECT tconst, primaryTitle, startYear
     FROM movie_basics
-    WHERE titleType = '${type}' AND startYear = 2022;
+    WHERE titleType = '${type}';
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -82,7 +82,7 @@ const filter_movie = async function (req, res){
   const genres = req.query.genres ?? ''
   if(genres === ''){
   connection.query(`
-    SELECT tconst
+    SELECT tconst, primaryTitle
     FROM movie_basics
     WHERE isAdult = ${isAdult}
     AND startYear >= ${startYear}
@@ -101,7 +101,7 @@ const filter_movie = async function (req, res){
     genres_split = genres.split(',')
     if(genres_split.length === 1){
       connection.query(`
-      SELECT tconst
+      SELECT tconst, primaryTitle
       FROM movie_basics
       WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
       AND isAdult = ${isAdult}
@@ -119,7 +119,7 @@ const filter_movie = async function (req, res){
       });
     } else if(genres_split.length === 2){
       connection.query(`
-      SELECT tconst
+      SELECT tconst, primaryTitle
       FROM movie_basics
       WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
       AND LOWER(genres) LIKE '%${genres_split[1]}%'
@@ -138,7 +138,7 @@ const filter_movie = async function (req, res){
       });
     } else if(genres_split.length === 3){
       connection.query(`
-      SELECT tconst
+      SELECT tconst, primaryTitle
       FROM movie_basics
       WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
       AND LOWER(genres) LIKE '%${genres_split[1]}%'
