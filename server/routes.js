@@ -30,26 +30,40 @@ const author = async function(req, res) {
 // Route 1: GET /search
 const search = async function(req, res) {
   const search_text = req.query.text
-  connection.query(`
-  SELECT DISTINCT title FROM
-  (
+  if(search_text){
+    connection.query(`
+    SELECT DISTINCT title FROM
     (
-    SELECT titleId AS tconst, title AS title FROM akas
-    WHERE X LIKE '${search_text}'
+      (
+      SELECT titleId AS tconst, title AS title FROM akas
+      WHERE X LIKE '${search_text}'
+      )
+      UNION
+      (
+      SELECT tconst, primaryTitle AS title FROM movie_basics
+      WHERE X LIKE '${search_text}')
     )
-    UNION
-    (
-    SELECT tconst, primaryTitle AS title FROM movie_basics
-    WHERE X LIKE '${search_text}')
-  )
-  `, (err, data) => {
-      if(err || data.length === 0){
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
-    });
+    `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+  } else {
+    connection.query(`
+      SELECT tconst, primaryTitle AS title FROM movie_basics
+    `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+  }
+  
 }
 
 // TODO: need to modify the query, we need abbreviate info for each movie to display
@@ -174,7 +188,7 @@ const get_distinct_genres = async function (req, res){
     (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(genres,',', 2), ',',-1) AS genre FROM movie_basics)
         UNION
     (SELECT SUBSTRING_INDEX(genres, ',', -1) AS genre FROM movie_basics))
-    SELECT distinct(genre) FROM separate_genres WHERE genre IS NOT NULL;
+    SELECT distinct(genre) FROM separate_genres WHERE genre IS NOT NULL ORDER BY genre;
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -188,7 +202,7 @@ const get_distinct_genres = async function (req, res){
 //Route 5: GET /distinct_types
 const get_distinct_types = async function (req, res){
   connection.query(`
-    SELECT DISTINCT titleType FROM movie_basics;
+    SELECT DISTINCT titleType FROM movie_basics ORDER BY titleType;
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -237,34 +251,66 @@ const get_video_crew = async function (req, res){
 const get_top5 = async function (req, res){
   const year = req.params.year
   const type = req.params.type ?? ''
-  if(type === ''){
-    connection.query(`
-      SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
-      JOIN ratings rt ON mb.tconst = rt.tconst
-      WHERE mb.startYear = ${year} ORDER BY rt.averageRating DESC
-      LIMIT 5
-    `, (err, data) => {
-      if(err || data.length === 0){
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
-    });
+  if(type){
+    if(year){
+      connection.query(`
+        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        JOIN ratings rt ON mb.tconst = rt.tconst
+        WHERE mb.startYear = ${year} AND mb.titleType = '${type}' ORDER BY rt.averageRating DESC
+        LIMIT 5
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    } else {
+      connection.query(`
+        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        JOIN ratings rt ON mb.tconst = rt.tconst
+        WHERE mb.titleType = '${type}' ORDER BY rt.averageRating DESC
+        LIMIT 5
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    }
   } else {
-    connection.query(`
-      SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
-      JOIN ratings rt ON mb.tconst = rt.tconst
-      WHERE mb.startYear = ${year} AND mb.titleType = '${type}' ORDER BY rt.averageRating DESC
-      LIMIT 5
-    `, (err, data) => {
-      if(err || data.length === 0){
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
-    });
+    if(year){
+      connection.query(`
+        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        JOIN ratings rt ON mb.tconst = rt.tconst
+        WHERE mb.startYear = ${year} ORDER BY rt.averageRating DESC
+        LIMIT 5
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    } else {
+      connection.query(`
+        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        JOIN ratings rt ON mb.tconst = rt.tconst
+        ORDER BY rt.averageRating DESC
+        LIMIT 5
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    }
   }
 }
 
