@@ -34,9 +34,9 @@ export default function HomePage() {
     },
   ];
 
-    const top1000record = [
+  const top1000record = [
     {
-      field: 'primaryTitle',
+      field: 'Title',
       headerName: 'Movie Title',
       // renderCell: (row) => <Link onClick={() => setSelectedSongId(row.song_id)}>{row.title}</Link> 
     },
@@ -53,6 +53,10 @@ export default function HomePage() {
       field: 'category',
       headerName: 'Category'
     },
+    {
+      field: 'crew',
+      headerName: 'Crew'
+    },
   ];
 
   return (
@@ -63,7 +67,7 @@ export default function HomePage() {
       <Divider /> */}
       <h2>Top 1000</h2>
       {/* <LazyTable route={`http://${config.server_host}:${config.server_port}/top5/2021/movie`} columns={songColumns} /> */}
-      <LazyTable route={`http://${config.server_host}:${config.server_port}/top1000`} columns={top1000record} />
+      <LazyTable route={`http://${config.server_host}:${config.server_port}/movie_pop_crew`} columns={top1000record} />
       <Divider />
       <p>{appAuthor}</p>
     </Container>
