@@ -544,7 +544,7 @@ module.exports = {
   get_video_info,
   get_video_crew,
   get_top5,
-  // get_people,
+  top1000,
   movie_pop_crew,
   pop_people_media,
   rating_trend
