@@ -446,6 +446,65 @@ const rating_trend = async function (req, res){
 }
 
 // Route 11: GET /top1000
+const top1000 = async function (req, res){
+  connection.query(`
+    WITH C AS(
+    SELECT movie_basics.tconst, SUBSTRING_INDEX(genres, ',', 1) AS genre
+    FROM movie_basics
+    UNION
+    SELECT movie_basics.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(genres, ',', 2), ',', -1) AS genre
+    FROM movie_basics
+    UNION
+    SELECT movie_basics.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(genres, ',', 3), ',', -1) AS genre
+    FROM movie_basics),
+
+    G AS (
+    SELECT C.*, m.primaryTitle AS title, m.titleType, m.startYear, m.runtimeMinutes, r.averageRating
+    FROM C
+    JOIN movie_basics m ON C.tconst = m.tconst
+    JOIN ratings r on m.tconst = r.tconst
+    WHERE C.genre IS NOT NULL),
+
+    rs AS(
+    SELECT G.tconst, G.title, G.titleType, G.startYear, G.runtimeMinutes, G.genre, G.averageRating, Rank()
+    OVER(
+    Partition BY G.startYear, G.genre, G.titleType
+    ORDER BY G.averageRating DESC) AS rn
+    FROM G),
+
+
+    D AS(
+    SELECT crew.tconst, SUBSTRING_INDEX(directors, ',', 1) AS director_id
+    FROM crew
+    UNION
+    SELECT crew.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(directors, ',', 2), ',', -1) AS director_id
+    FROM crew),
+
+
+    L AS (
+    SELECT D.*, nb.primaryName
+    FROM D
+    JOIN name_basics nb ON D.director_id = nb.nconst
+    WHERE D.director_id IS NOT NULL)
+
+
+
+    SELECT rs.tconst, rs.title, rs.titleType, rs.startYear, rs.runtimeMinutes, rs.genre, rs.averageRating, dd.director AS directors
+    FROM rs
+    JOIN (SELECT tconst, GROUP_CONCAT(primaryName) AS director
+    FROM L
+    GROUP BY tconst) dd
+    ON rs.tconst = dd.tconst
+    WHERE rs.rn <= 1000;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
 
 // Route 12: GET /pop_people_media
 // complex enough? doesn't make sense
