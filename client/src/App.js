@@ -5,6 +5,7 @@ import { createTheme } from "@mui/material/styles";
 
 import NavBar from './components/NavBar';
 import HomePage from './pages/HomePage';
+import SearchPage from './pages/SearchPage';
 
 // createTheme
 export const theme = createTheme({
@@ -22,6 +23,7 @@ export default function App() {
         <NavBar />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/search" element={<SearchPage />}/>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
