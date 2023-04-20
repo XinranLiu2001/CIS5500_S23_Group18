@@ -19,7 +19,8 @@ app.get('/video/:tconst', routes.get_video_info);
 app.get('/video_crew/:tconst', routes.get_video_crew);
 app.get('/top5/:year/:type', routes.get_top5);
 // app.get('/movie_pop_crew', routes.movie_pop_crew);
-// app.get('/top1000', routes.top1000);
+app.get('/top1000', routes.get_top1000);
+app.get('/movie_pop_crew', routes.get_people);
 // app.get('/pop_people_media', routes.pop_people_media);
 // app.get('/rating_trend/:crew', routes.rating_trend);
 
