@@ -84,462 +84,73 @@ const filter_movie = async function (req, res){
   const runtimeMinutesHigh = req.query.runtimeMinutesHigh ?? 43200
   const genres = req.query.genres ?? ''
   const type = req.query.type ?? ''
-  if(search_text == ''){
-    if(type == ''){
-      if(genres === ''){
-        connection.query(`
-          SELECT tconst, primaryTitle
-          FROM movie_basics 
-          WHERE isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-        `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-      } else {
-        genres_split = genres.split(',')
-        if(genres_split.length === 1){
-          connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 2){
-          connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 3){
-          connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND LOWER(genres) LIKE '%${genres_split[2]}%'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else {
-          // we only have at most three genres for each movie, thus when having
-          // more than three genres, it is impossible for use to have any video fit the result
-          res.json([])
-        }
-      }
-    } else {
-      if(genres === ''){
-        connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE isAdult = ${isAdult}
-          AND titleType = '${type}'
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-        `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-      } else {
-        genres_split = genres.split(',')
-        if(genres_split.length === 1){
-          connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND isAdult = ${isAdult}
-          AND titleType = '${type}'
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 2){
-          connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND titleType = '${type}'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 3){
-          connection.query(`
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND LOWER(genres) LIKE '%${genres_split[2]}%'
-          AND titleType = '${type}'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else {
-          // we only have at most three genres for each movie, thus when having
-          // more than three genres, it is impossible for use to have any video fit the result
-          res.json([])
-        }
-      }
-    }
+  let genre1 = ''
+  let genre2 = ''
+  let genre3 = ''
+  genres_split = genres.split(',')
+  if(genres_split.length === 1) {
+    genre1 = genres_split[0];
+  } else if (genres_split.length === 2) {
+    genre1 = genres_split[0];
+    genre2 = genres_split[1];
+  } else if (genres_split.length === 3) {
+    genre1 = genres_split[0];
+    genre2 = genres_split[1];
+    genre3 = genres_split[2];
+  } else if (genres_split.length > 3){
+    res.json([]);
   } else {
-    if(type == ''){
-      if(genres === ''){
-        connection.query(`
-        With akas_match AS (
-          SELECT DISTINCT title FROM
-          (
-            (
-            SELECT titleId AS tconst, title AS title FROM akas
-            WHERE X LIKE '${search_text}'
-            )
-            UNION
-            (
-            SELECT tconst, primaryTitle AS title FROM movie_basics
-            WHERE X LIKE '${search_text}')
-          )
-        )
-          SELECT tconst, primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-        `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-      } else {
-        genres_split = genres.split(',')
-        if(genres_split.length === 1){
-          connection.query(`
-          With akas_match AS (
-            SELECT DISTINCT title FROM
-            (
-              (
-              SELECT titleId AS tconst, title AS title FROM akas
-              WHERE LOWER(title) LIKE '${search_text}'
-              )
-              UNION
-              (
-              SELECT tconst, primaryTitle AS title FROM movie_basics
-              WHERE LOWER(title) LIKE '${search_text}')
-            )
-          )
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 2){
-          connection.query(`
-          With akas_match AS (
-            SELECT DISTINCT title FROM
-            (
-              (
-              SELECT titleId AS tconst, title AS title FROM akas
-              WHERE title LIKE '${search_text}'
-              )
-              UNION
-              (
-              SELECT tconst, primaryTitle AS title FROM movie_basics
-              WHERE title LIKE '${search_text}')
-            )
-          )
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 3){
-          connection.query(`
-          With akas_match AS (
-            SELECT DISTINCT title FROM
-            (
-              (
-              SELECT titleId AS tconst, title AS title FROM akas
-              WHERE LOWER(title) LIKE '${search_text}'
-              )
-              UNION
-              (
-              SELECT tconst, primaryTitle AS title FROM movie_basics
-              WHERE LOWER(title) LIKE '${search_text}')
-            )
-          )
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND LOWER(genres) LIKE '%${genres_split[2]}%'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
+    console.log('no genre');
+  }
+
+  if(type == ''){
+    connection.query(`
+      WITH tmp_table AS(
+        SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
+        isAdult, startYear, runtimeMinutes
+      FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
+      GROUP BY genres, primaryTitle)
+
+      SELECT tconst, primaryTitle FROM tmp_table
+      WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
+      AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+      AND isAdult = ${isAdult}
+      AND startYear >= ${startYear}
+      AND startYear <= ${endYear}
+      AND runtimeMinutes >= ${runtimeMinutesLow}
+      AND runtimeMinutes <= ${runtimeMinutesHigh};
+    `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
         } else {
-          // we only have at most three genres for each movie, thus when having
-          // more than three genres, it is impossible for use to have any video fit the result
-          res.json([])
+          res.json(data);
         }
-      }
-    } else {
-      if(genres === ''){
-        connection.query(`
-        With akas_match AS (
-          SELECT DISTINCT title FROM
-          (
-            (
-            SELECT titleId AS tconst, title AS title FROM akas
-            WHERE X LIKE '${search_text}'
-            )
-            UNION
-            (
-            SELECT tconst, primaryTitle AS title FROM movie_basics
-            WHERE X LIKE '${search_text}')
-          )
-        )
-          SELECT tconst, primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE isAdult = ${isAdult}
-          AND titleType = '${type}'
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-        `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-      } else {
-        genres_split = genres.split(',')
-        if(genres_split.length === 1){
-          connection.query(`
-          With akas_match AS (
-            SELECT DISTINCT title FROM
-            (
-              (
-              SELECT titleId AS tconst, title AS title FROM akas
-              WHERE LOWER(title) LIKE '${search_text}'
-              )
-              UNION
-              (
-              SELECT tconst, primaryTitle AS title FROM movie_basics
-              WHERE LOWER(title) LIKE '${search_text}')
-            )
-          )
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND isAdult = ${isAdult}
-          AND titleType = '${type}'
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 2){
-          connection.query(`
-          With akas_match AS (
-            SELECT DISTINCT title FROM
-            (
-              (
-              SELECT titleId AS tconst, title AS title FROM akas
-              WHERE title LIKE '${search_text}'
-              )
-              UNION
-              (
-              SELECT tconst, primaryTitle AS title FROM movie_basics
-              WHERE title LIKE '${search_text}')
-            )
-          )
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND titleType = '${type}'
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
-        } else if(genres_split.length === 3){
-          connection.query(`
-          With akas_match AS (
-            SELECT DISTINCT title FROM
-            (
-              (
-              SELECT titleId AS tconst, title AS title FROM akas
-              WHERE LOWER(title) LIKE '${search_text}'
-              )
-              UNION
-              (
-              SELECT tconst, primaryTitle AS title FROM movie_basics
-              WHERE LOWER(title) LIKE '${search_text}')
-            )
-          )
-          SELECT movie_basics.tconst, movie_basics.primaryTitle
-          FROM movie_basics 
-          JOIN akas_match ON akas_match.tconst = movie_basics.tconst
-          WHERE LOWER(genres) LIKE '%${genres_split[0]}%'
-          AND LOWER(genres) LIKE '%${genres_split[1]}%'
-          AND LOWER(genres) LIKE '%${genres_split[2]}%'
-          AND titleType = '${type}
-          AND isAdult = ${isAdult}
-          AND startYear >= ${startYear}
-          AND startYear <= ${endYear}
-          AND runtimeMinutes >= ${runtimeMinutesLow}
-          AND runtimeMinutes <= ${runtimeMinutesHigh};
-          `, (err, data) => {
-            if(err || data.length === 0){
-              console.log(err);
-              res.json([]);
-            } else {
-              res.json(data);
-            }
-          });
+      });
+  } else {
+      connection.query(`
+      WITH tmp_table AS(SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
+      isAdult, startYear, runtimeMinutes
+      FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
+      GROUP BY genres, primaryTitle)
+
+      SELECT tconst, primaryTitle FROM tmp_table
+      WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
+      AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+      AND titleType = '${type}'
+      AND isAdult = ${isAdult}
+      AND startYear >= ${startYear}
+      AND startYear <= ${endYear}
+      AND runtimeMinutes >= ${runtimeMinutesLow}
+      AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
         } else {
-          // we only have at most three genres for each movie, thus when having
-          // more than three genres, it is impossible for use to have any video fit the result
-          res.json([])
+          res.json(data);
         }
-      }
-    }
+      });
   }
 }
 
