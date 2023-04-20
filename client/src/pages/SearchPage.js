@@ -10,12 +10,13 @@ export default function SearchPage() {
   const [genre, setGenre] = useState([]);
   const [type, setType] = useState([]);
   const [selectedVideoId, setSelectedVideoId] = useState(null);
-
+  const [checkedGenres, setCheckedGenres] = useState([]);
   const [checkedTypes, setCheckedTypes] = useState([]);
-  // const handleCheckedTypesChange = (newCheckedTypes) => {
-  //   setCheckedTypes(newCheckedTypes);
-  // };
-
+  const [title, setTitle] = useState('');
+  const [year, setYear] = useState([1888, 2030]);
+  const [runtimeMinutes, setTime] = useState([0, 43200]);
+  const [isAdult, setIsAdult] = useState(false);
+  
   const toggleCheckedType = (t) => {
     if (checkedTypes.includes(t)) {
       setCheckedTypes(checkedTypes.filter((_t) => _t !== t));
@@ -24,11 +25,6 @@ export default function SearchPage() {
     }
   };
 
-  const [checkedGenres, setCheckedGenres] = useState([]);
-  // const handleCheckedGenresChange = (newCheckedGenres) => {
-  //   setCheckedGenres(newCheckedGenres);
-  // };
-
   const toggleCheckedGenre = (t) => {
     if (checkedGenres.includes(t)) {
       setCheckedGenres(checkedGenres.filter((_t) => _t !== t));
@@ -36,11 +32,6 @@ export default function SearchPage() {
       setCheckedGenres([...checkedGenres, t]);
     }
   };
-
-  const [title, setTitle] = useState('');
-  const [year, setYear] = useState([1888, 2030]);
-  const [runtimeMinutes, setTime] = useState([0, 43200]);
-  const [isAdult, setIsAdult] = useState(false);
 
   useEffect(() => {
     fetch(`http://${config.server_host}:${config.server_port}/distinct_types`)
