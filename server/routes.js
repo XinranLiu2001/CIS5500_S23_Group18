@@ -12,18 +12,6 @@ const connection = mysql.createConnection({
 });
 connection.connect((err) => err && console.log(err));
 
-// // Route 1: GET /author/:type
-// const author = async function(req, res) {
-//   const name = 'Team18';
-
-//   if (req.params.type === 'name') {
-//     // res.send returns data back to the requester via an HTTP response
-//     res.send(`Created by ${name}`);
-//   } else {
-//     res.status(400).send(`'${req.params.type}' is not a valid author type. `);
-//   }
-// }
-
 /**********************
  * Basic routes
  **********************/
