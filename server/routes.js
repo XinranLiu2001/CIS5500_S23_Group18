@@ -193,8 +193,8 @@ const get_distinct_types = async function (req, res){
 const get_video_info = async function (req, res){
   const tconst = req.params.tconst
   connection.query(`
-    SELECT B.StartYear, B.EndYear, A.title, A.language, B.isAdult, B.titleType AS type FROM movie_basics B JOIN aka A
-    ON B.tconst = A.titleId WHERE B.tconst = ${tconst};
+    SELECT B.StartYear, B.EndYear, A.title, A.language, B.isAdult, B.titleType AS type FROM movie_basics B JOIN akas A
+    ON B.tconst = A.titleId WHERE B.tconst = '${tconst}';
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -206,13 +206,14 @@ const get_video_info = async function (req, res){
 }
 
 //Route 7: GET /video_crew/:tconst
+// add nconst
 const get_video_crew = async function (req, res){
   const tconst = req.params.tconst
   connection.query(`
-  SELECT B.category, B.characters, C.primaryName, C.birthYear, C.deathYear FROM movie_basics A
-  JOIN principals B ON A.tconst = B.tconst
-  JOIN name_basics C ON B.nconst = C.nconst
-  WHERE A.tconst = '${tconst}'
+    SELECT B.nconst, B.category, B.characters, C.primaryName, C.birthYear, C.deathYear FROM movie_basics A
+    JOIN principals B ON A.tconst = B.tconst
+    JOIN name_basics C ON B.nconst = C.nconst
+    WHERE A.tconst = '${tconst}'
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -224,13 +225,14 @@ const get_video_crew = async function (req, res){
 }
 
 // Route 8: GET /top5/:year/:type
+// add tconst change!!!! show add limitation 
 const get_top5 = async function (req, res){
   const year = req.params.year
   const type = req.params.type ?? ''
   if(type){
     if(year){
       connection.query(`
-        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
         WHERE mb.startYear = ${year} AND mb.titleType = '${type}' ORDER BY rt.averageRating DESC
         LIMIT 5
@@ -244,7 +246,7 @@ const get_top5 = async function (req, res){
       });
     } else {
       connection.query(`
-        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
         WHERE mb.titleType = '${type}' ORDER BY rt.averageRating DESC
         LIMIT 5
@@ -260,7 +262,7 @@ const get_top5 = async function (req, res){
   } else {
     if(year){
       connection.query(`
-        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
         WHERE mb.startYear = ${year} ORDER BY rt.averageRating DESC
         LIMIT 5
@@ -274,7 +276,7 @@ const get_top5 = async function (req, res){
       });
     } else {
       connection.query(`
-        SELECT mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
+        SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
         ORDER BY rt.averageRating DESC
         LIMIT 5
@@ -290,65 +292,8 @@ const get_top5 = async function (req, res){
   }
 }
 
-// Route 9: GET /top1000
-const get_top1000 = async function (req, res){
-  const page = req.query.page;
-  const pageSize = req.query.page_size ?? 10;
-
-  if (!page) {
-    connection.query(`
-      WITH C AS(
-      SELECT B.*, A.averageRating, A.numVotes FROM movie_basics B
-      INNER JOIN ratings A
-      ON B.tconst = A.tconst),
-      rs AS(
-      SELECT C.tconst, C.primaryTitle, C.titleType, C.averageRating, C.startYear, Rank() OVER(
-      Partition BY C.titleType, C.startYear
-      ORDER BY C.averageRating DESC) AS rn
-      FROM C)
-      SELECT rs.tconst, rs.primaryTitle, rs.titleType, rs.averageRating, rs.startYear, pr.nconst, pr.category
-      FROM rs
-      JOIN principals pr
-      ON rs.tconst = pr.tconst WHERE rs.rn <= 1000
-    `, (err, data) => {
-      if(err || data.length === 0){
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
-    });
-  } else {
-    const offset = (page-1) * pageSize
-    connection.query(`
-      WITH C AS(
-      SELECT B.*, A.averageRating, A.numVotes FROM movie_basics B
-      INNER JOIN ratings A
-      ON B.tconst = A.tconst),
-      rs AS(
-      SELECT C.tconst, C.primaryTitle, C.titleType, C.averageRating, C.startYear, Rank() OVER(
-      Partition BY C.titleType, C.startYear
-      ORDER BY C.averageRating DESC) AS rn
-      FROM C)
-      SELECT rs.tconst, rs.primaryTitle, rs.titleType, rs.averageRating, rs.startYear, pr.nconst, pr.category
-      FROM rs
-      JOIN principals pr
-      ON rs.tconst = pr.tconst WHERE rs.rn <= 1000
-      LIMIT ${pageSize} OFFSET ${offset};
-    `, (err, data) => {
-      if(err || data.length === 0){
-        console.log(err);
-        res.json([]);
-      } else {
-        res.json(data);
-      }
-    });
-  }
-
-}
-
-// Route 10: GET /top1000
-const get_people = async function (req, res){
+// Route 9: GET /movie_pop_crew
+const movie_pop_crew = async function (req, res){
   connection.query(`
     WITH TMP_TABLE AS(
     SELECT T2.primaryTitle AS MediaTitle, D.averageRating, T2.People, T2.PersonName,
@@ -373,9 +318,148 @@ const get_people = async function (req, res){
   });
 }
 
+// Route 10: GET /rating_trend/:crew
+// simple?
+const rating_trend = async function (req, res){
+  const crewid = req.params.crew
+  connection.query(`
+    WITH tmp_table AS(
+    SELECT T2.primaryTitle AS MediaTitle, D.averageRating, T2.People, T2.PersonName,
+          T2.category, T2.startYear, T2.birthyear, T2.nconst
+    FROM
+        (SELECT T1.tconst, T1.primaryTitle, T1.isAdult, T1.category AS People, C.primaryName AS PersonName, T1.startYear,
+                T1.category, C.birthyear, C.nconst AS nconst
+        FROM
+            (SELECT A.tconst, A.primaryTitle, A.isAdult, A.startYear, B.category, B.nconst
+            FROM movie_basics A
+            JOIN principals B ON A.tconst = B.tconst) T1
+        JOIN name_basics C ON C.nconst = T1.nconst
+        WHERE T1.category IN ('actress', 'actor', 'director', 'writer', 'composer') AND T1.isAdult = 0) T2
+    JOIN ratings D ON D.tconst = T2.tconst)
+
+    SELECT PersonName, startYear, People, AVG(averageRating) AS average_rating, startYear-birthyear AS currentAge,
+          GROUP_CONCAT(MediaTitle SEPARATOR '; ') AS mainMedia
+    FROM tmp_table
+    WHERE nconst = '${crewid}'
+    GROUP BY PersonName, startYear
+    ORDER BY PersonName, startYear;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+// Route 11: GET /top1000
+const get_top1000 = async function (req, res){
+  connection.query(`
+    WITH C AS(
+    SELECT movie_basics.tconst, SUBSTRING_INDEX(genres, ',', 1) AS genre
+    FROM movie_basics
+    UNION
+    SELECT movie_basics.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(genres, ',', 2), ',', -1) AS genre
+    FROM movie_basics
+    UNION
+    SELECT movie_basics.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(genres, ',', 3), ',', -1) AS genre
+    FROM movie_basics),
+
+    G AS (
+    SELECT C.*, m.primaryTitle AS title, m.titleType, m.startYear, m.runtimeMinutes, r.averageRating
+    FROM C
+    JOIN movie_basics m ON C.tconst = m.tconst
+    JOIN ratings r on m.tconst = r.tconst
+    WHERE C.genre IS NOT NULL),
+
+    rs AS(
+    SELECT G.tconst, G.title, G.titleType, G.startYear, G.runtimeMinutes, G.genre, G.averageRating, Rank()
+    OVER(
+    Partition BY G.startYear, G.genre, G.titleType
+    ORDER BY G.averageRating DESC) AS rn
+    FROM G),
+
+
+    D AS(
+    SELECT crew.tconst, SUBSTRING_INDEX(directors, ',', 1) AS director_id
+    FROM crew
+    UNION
+    SELECT crew.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(directors, ',', 2), ',', -1) AS director_id
+    FROM crew),
+
+
+    L AS (
+    SELECT D.*, nb.primaryName
+    FROM D
+    JOIN name_basics nb ON D.director_id = nb.nconst
+    WHERE D.director_id IS NOT NULL)
+
+
+
+    SELECT rs.tconst, rs.title, rs.titleType, rs.startYear, rs.runtimeMinutes, rs.genre, rs.averageRating, dd.director AS directors
+    FROM rs
+    JOIN (SELECT tconst, GROUP_CONCAT(primaryName) AS director
+    FROM L
+    GROUP BY tconst) dd
+    ON rs.tconst = dd.tconst
+    WHERE rs.rn <= 1000;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+// Route 12: GET /pop_people_media
+// complex enough? doesn't make sense
+const pop_people_media = async function (req, res){
+  connection.query(`
+    SELECT primaryName, GROUP_CONCAT(primaryTitle SEPARATOR '; ') AS all_shows FROM (
+    WITH actorActress AS (
+    SELECT p.nconst, p.category, nb.primaryName
+    FROM principals p JOIN name_basics nb on p.nconst = nb.nconst WHERE tconst IN(
+    SELECT titleId as tconst
+    FROM(
+    SELECT titleId, COUNT(*) as numArea FROM akas
+    GROUP BY titleId
+    ) T1
+    WHERE numArea >= 5) AND category IN ('actress', 'actor'))
+    SELECT A.*, B.tconst, mb.primaryTitle, r.averageRating FROM actorActress A JOIN principals B
+    ON A.nconst = B.nconst
+    JOIN movie_basics mb on B.tconst = mb.tconst
+    JOIN ratings r on mb.tconst = r.tconst WHERE r.averageRating > 6) A GROUP BY primaryName;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+// Route 13: GET /crew/:nconst
+const get_crew_info = async function (req, res){
+  const nconst = req.params.nconst
+  connection.query(`
+    SELECT primaryName, birthYear, deathYear, IF(deathYear IS NULL, 2023 - birthYear, deathYear - birthYear) AS age, primaryProfession
+    FROM name_basics
+    WHERE nconst = '${nconst}';
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
 
 module.exports = {
-  // author,
   search,
   get_type,
   filter_movie,
@@ -385,5 +469,9 @@ module.exports = {
   get_video_crew,
   get_top5,
   get_top1000,
-  get_people
+  movie_pop_crew,
+  rating_trend,
+  pop_people_media,
+  get_crew_info
 }
+

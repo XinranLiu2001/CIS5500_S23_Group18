@@ -36,7 +36,6 @@ export default function NavBar() {
         <Toolbar disableGutters>
           <NavText href='/' text='IMDB' isMain />
           <NavText href='/movies' text='MOVIES' />
-          <NavText href='/people' text='PEOPLE' />
           <NavText href='/search' text='SEARCH' />
         </Toolbar>
       </Container>
