@@ -15,44 +15,44 @@ connection.connect((err) => err && console.log(err));
 /**********************
  * Basic routes
  **********************/
-// Route 1: GET /search
-const search = async function(req, res) {
-  const search_text = req.query.text
-  if(search_text){
-    connection.query(`
-    SELECT DISTINCT title FROM
-    (
-      (
-      SELECT titleId AS tconst, title AS title FROM akas
-      WHERE X LIKE '${search_text}'
-      )
-      UNION
-      (
-      SELECT tconst, primaryTitle AS title FROM movie_basics
-      WHERE X LIKE '${search_text}')
-    )
-    `, (err, data) => {
-        if(err || data.length === 0){
-          console.log(err);
-          res.json([]);
-        } else {
-          res.json(data);
-        }
-      });
-  } else {
-    connection.query(`
-      SELECT tconst, primaryTitle AS title FROM movie_basics
-    `, (err, data) => {
-        if(err || data.length === 0){
-          console.log(err);
-          res.json([]);
-        } else {
-          res.json(data);
-        }
-      });
-  }
+// Route 1: GET /search *combined with route 3
+// const search = async function(req, res) {
+//   const search_text = req.query.text
+//   if(search_text){
+//     connection.query(`
+//     SELECT DISTINCT title FROM
+//     (
+//       (
+//       SELECT titleId AS tconst, title AS title FROM akas
+//       WHERE X LIKE '${search_text}'
+//       )
+//       UNION
+//       (
+//       SELECT tconst, primaryTitle AS title FROM movie_basics
+//       WHERE X LIKE '${search_text}')
+//     )
+//     `, (err, data) => {
+//         if(err || data.length === 0){
+//           console.log(err);
+//           res.json([]);
+//         } else {
+//           res.json(data);
+//         }
+//       });
+//   } else {
+//     connection.query(`
+//       SELECT tconst, primaryTitle AS title FROM movie_basics
+//     `, (err, data) => {
+//         if(err || data.length === 0){
+//           console.log(err);
+//           res.json([]);
+//         } else {
+//           res.json(data);
+//         }
+//       });
+//   }
   
-}
+// }
 
 // TODO: need to modify the query, we need abbreviate info for each movie to display
 //Route 2: Get /type/:type
@@ -72,7 +72,6 @@ const get_type = async function (req, res){
   });
 }
 
-//TODO: the query needs at least to display the movie's title
 //Route 3: GET /filter_movie
 //genre type: "a,b,c" 
 const filter_movie = async function (req, res){
@@ -111,7 +110,7 @@ const filter_movie = async function (req, res){
       FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
       GROUP BY genres, primaryTitle)
 
-      SELECT tconst, primaryTitle FROM tmp_table
+      SELECT tconst, primaryTitle, startYear, runtimeMinutes FROM tmp_table
       WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
       AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
       AND isAdult = ${isAdult}
@@ -134,7 +133,7 @@ const filter_movie = async function (req, res){
       FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
       GROUP BY genres, primaryTitle)
 
-      SELECT tconst, primaryTitle FROM tmp_table
+      SELECT tconst, primaryTitle, startYear, runtimeMinutes FROM tmp_table
       WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
       AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
       AND titleType = '${type}'
@@ -459,8 +458,90 @@ const get_crew_info = async function (req, res){
   });
 }
 
+// Route 13: GET /crew/:nconst
+const search_crew_info = async function (req, res){
+  const nconst = req.params.nconst
+  const search_text = req.query.name ?? '';
+  const isDead = req.query.isAdult === 'true' ? 1 : 0;
+  const startYear = req.query.startYear ?? 1888
+  const endYear = req.query.endYear ?? 2030
+  const professions = req.query.professions ?? ''
+  const type = req.query.type ?? ''
+  let profession1 = ''
+  let profession2 = ''
+  let profession3 = ''
+  professions_split = professions.split(',')
+  if(professions_split.length === 1) {
+    profession1 = professions_split[0];
+  } else if (professions_split.length === 2) {
+    profession1 = professions_split[0];
+    profession2 = professions_split[1];
+  } else if (professions_split.length === 3) {
+    profession1 = professions_split[0];
+    profession2 = professions_split[1];
+    profession3 = professions_split[2];
+  } else if (professions_split.length > 3){
+    res.json([]);
+  } else {
+    console.log('no profession');
+  }
+
+  if(isDead === 1){
+    connection.query(`
+      SELECT nconst, primaryName FROM name_basics
+      WHERE primaryProfession LIKE '%${profession1}%' AND primaryProfession LIKE '%${profession2}%' AND primaryProfession LIKE '%${profession3}%'
+      AND primaryName LIKE '%${search_text}%'
+      AND deathYear IS NOT NULL
+      AND birthYear >= ${startYear}
+      AND birthYear <= ${endYear};
+    `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+  } else {
+      connection.query(`
+      SELECT nconst, primaryName FROM name_basics
+      WHERE primaryProfession LIKE '%${profession1}%' AND primaryProfession LIKE '%${profession2}%' AND primaryProfession LIKE '%${profession3}%'
+      AND primaryName LIKE '%${search_text}%'
+      AND birthYear >= ${startYear}
+      AND birthYear <= ${endYear};
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+  }
+}
+
+const get_distinct_professions = async function (req, res){
+  connection.query(`
+    WITH separate_professions
+    AS
+    ((SELECT SUBSTRING_INDEX(primaryProfession, ',', 1) AS profession FROM name_basics)
+        UNION
+    (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(primaryProfession,',', 2), ',',-1) AS profession FROM name_basics)
+        UNION
+    (SELECT SUBSTRING_INDEX(primaryProfession, ',', -1) AS profession FROM name_basics))
+    SELECT distinct(profession) FROM separate_professions WHERE profession IS NOT NULL ORDER BY profession;
+  `, (err, data) => {
+    if(err || data.length === 0){
+      console.log(err);
+      res.json([]);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
 module.exports = {
-  search,
+  // search,
   get_type,
   filter_movie,
   get_distinct_genres,
@@ -472,6 +553,8 @@ module.exports = {
   movie_pop_crew,
   rating_trend,
   pop_people_media,
-  get_crew_info
+  get_crew_info,
+  get_distinct_professions,
+  search_crew_info
 }
 

@@ -36,7 +36,8 @@ export default function NavBar() {
         <Toolbar disableGutters>
           <NavText href='/' text='IMDB' isMain />
           <NavText href='/movies' text='MOVIES' />
-          <NavText href='/search' text='SEARCH' />
+          <NavText href='/search_video' text='SEARCH VIDEOS' />
+          <NavText href='/search_crew' text='SEARCH CREWS' />
         </Toolbar>
       </Container>
     </AppBar>

@@ -1,29 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, Container, FormControlLabel, Grid, Link, Slider, TextField } from '@mui/material';
+import { Button, Checkbox, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
+import { createFilterOptions } from '@mui/material/Autocomplete';
 import { DataGrid } from '@mui/x-data-grid';
+import { NavLink } from 'react-router-dom';
 
+// TODO: https://mui.com/material-ui/react-autocomplete/#customization
 const config = require('../config.json');
 
 export default function SearchPage() {
   const [pageSize, setPageSize] = useState(10);
   const [data, setData] = useState([]);
   const [genre, setGenre] = useState([]);
-  const [type, setType] = useState([]);
-  const [selectedVideoId, setSelectedVideoId] = useState(null);
+  const [type, setType] = useState('');
+  const [types, setTypes] = useState([]);
   const [checkedGenres, setCheckedGenres] = useState([]);
-  const [checkedTypes, setCheckedTypes] = useState([]);
   const [title, setTitle] = useState('');
   const [year, setYear] = useState([1888, 2030]);
   const [runtimeMinutes, setTime] = useState([0, 43200]);
   const [isAdult, setIsAdult] = useState(false);
-  
-  const toggleCheckedType = (t) => {
-    if (checkedTypes.includes(t)) {
-      setCheckedTypes(checkedTypes.filter((_t) => _t !== t));
-    } else {
-      setCheckedTypes([t]);
-    }
-  };
 
   const toggleCheckedGenre = (t) => {
     if (checkedGenres.includes(t)) {
@@ -38,7 +32,7 @@ export default function SearchPage() {
         .then(res => res.json())
         .then(resJson => {
             const all_types = resJson.map((t) => (t.titleType));
-            setType(all_types);
+            setTypes(all_types);
         });
     fetch(`http://${config.server_host}:${config.server_port}/distinct_genres`)
         .then(res => res.json())
@@ -59,7 +53,7 @@ export default function SearchPage() {
     fetch(`http://${config.server_host}:${config.server_port}/filter_movie?title=${title}` +
       `&startYear=${year[0]}&endYear=${year[1]}` +
       `&runtimeMinutesLow=${runtimeMinutes[0]}&runtimeMinutesHigh=${runtimeMinutes[1]}` +
-      `&isAdult=${isAdult}&type=${type[0]}&genres=${genreStr}`
+      `&isAdult=${isAdult}&type=${type}&genres=${genreStr}`
     )
       .then(res => res.json())
       .then(resJson => {
@@ -68,30 +62,25 @@ export default function SearchPage() {
       });
   }
 
-  // This defines the columns of the table of songs used by the DataGrid component.
-  // The format of the columns array and the DataGrid component itself is very similar to our
-  // LazyTable component. The big difference is we provide all data to the DataGrid component
-  // instead of loading only the data we need (which is necessary in order to be able to sort by column)
   const columns = [
-    { field: 'primaryTitle', headerName: 'Title', width: 300, renderCell: (params) => (
-        <Link onClick={() => setSelectedVideoId(params.row.tconst)}>{params.value}</Link>
-    ) }
-    // { field: 'startYear', headerName: 'Years' },
-    // { field: 'runtimeMinutes', headerName: 'RuntimeMinutes' },
-    // { field: 'isAdult', headerName: 'Adult' },
+    { field: 'primaryTitle', headerName: 'Title', renderCell: (params) => (
+        <Link component={NavLink} to={`/media/${params.row.tconst}`}>{params.value}</Link>
+    ), flex:3 },
+    { field: 'startYear', headerName: 'Years', flex: 1 },
+    { field: 'runtimeMinutes', headerName: 'RuntimeMinutes', flex: 1}
   ]
 
-  // This component makes uses of the Grid component from MUI (https://mui.com/material-ui/react-grid/).
-  // The Grid component is super simple way to create a page layout. Simply make a <Grid container> tag
-  // (optionally has spacing prop that specifies the distance between grid items). Then, enclose whatever
-  // component you want in a <Grid item xs={}> tag where xs is a number between 1 and 12. Each row of the
-  // grid is 12 units wide and the xs attribute specifies how many units the grid item is. So if you want
-  // two grid items of the same size on the same row, define two grid items with xs={6}. The Grid container
-  // will automatically lay out all the grid items into rows based on their xs values.
   return (
     <Container>
-      {/* {selectedVideoId && <SongCard songId={selectedSongId} handleClose={() => setSelectedSongId(null)} />} */}
-      <h2>Search Videos</h2>
+      {/* {selectedVideoId && <MediaPage mediaId={selectedVideoId} handleClose={() => setSelectedVideoId(null)} />} */}
+      <Typography variant ='h1' align='center'sx={{ 
+        color: 'secondary',
+        fontFamily: 'monospace',
+        fontWeight: 'bold',
+        padding: '20px'
+      }}>
+        Search Videos
+      </Typography>
       <Grid container spacing={6}>
         <Grid item xs={8}>
           <TextField label='Title' value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
@@ -104,14 +93,14 @@ export default function SearchPage() {
         </Grid>
         <h3>Type</h3>
         <Grid container spacing = {2}>
-        {type.map((t) => (
-            <Grid item key={t} xs={2}>
+        <RadioGroup value={type} onChange={(event) => setType(event.target.value)} row>
+        {types.map((t) => (
                 <FormControlLabel
+                value={t}
                 label={t}
-                control={<Checkbox checked={checkedTypes.includes(t)} onChange={() => toggleCheckedType(t)} />}
-                />
-            </Grid>
+                control={<Radio />} />
             ))}
+        </RadioGroup>
         </Grid>
         <h3>Genre</h3>
         <Grid container spacing = {2}>
@@ -156,6 +145,8 @@ export default function SearchPage() {
         rows={data}
         columns={columns}
         pageSize={pageSize}
+        checkboxSelection={false} 
+        disableSelectionOnClick={true}
         rowsPerPageOptions={[5, 10, 25]}
         onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
         autoHeight

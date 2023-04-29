@@ -6,6 +6,7 @@ import Paper from '@mui/material/Paper';
 import { NavLink } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import Footer from "../components/Footer"
 const config = require('../config.json');
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -82,7 +83,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <Container sx={{ py: 4 }}>
+    <div>
+      <Container sx={{ py: 4 }}>
       <Typography variant="h4" sx={{ mb: 4 }}>
         Top 5 
       </Typography>
@@ -94,6 +96,10 @@ export default function HomePage() {
           return <TypeTable key={type.titleType} titleType={type.titleType} />;
         })}
       </Grid>
-    </Container>
+      
+      </Container>
+      <Footer id="footer" />
+    </div>
+    
   );
 }
