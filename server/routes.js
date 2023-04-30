@@ -300,17 +300,18 @@ const movie_pop_crew = async function (req, res){
   connection.query(`
     WITH TMP_TABLE AS(
     SELECT T2.primaryTitle AS MediaTitle, D.averageRating, T2.People, T2.PersonName,
-    T2.Age FROM
-    (SELECT T1.tconst, T1.primaryTitle, T1.isAdult, T1.category AS People, C.primaryName AS PersonName,
+    T2.Age, T2.nconst
+    FROM
+    (SELECT T1.tconst, T1.primaryTitle, T1.isAdult, T1.category AS People, C.primaryName AS PersonName, T1.nconst,
     IF(C.deathYear IS NULL, 2023 - C.birthYear, C.deathYear - C.birthYear) AS age FROM
     (SELECT A.tconst, A.primaryTitle, A.isAdult, A.startYear, B.category, B.nconst FROM movie_basics A
     JOIN principals B ON A.tconst = B.tconst) T1
     JOIN name_basics C ON C.nconst = T1.nconst
     WHERE T1.category IN ('actress', 'actor') AND T1.isAdult = 0) T2 JOIN ratings D ON D.tconst = T2.tconst
     WHERE D.averageRating > 5)
-    SELECT MediaTitle, averageRating, GROUP_CONCAT(PersonName SEPARATOR '; ') AS MainActorActress, AVG(age) AS Avg_age
+    SELECT MediaTitle, averageRating, GROUP_CONCAT(PersonName SEPARATOR '; ') AS MainActorActress, GROUP_CONCAT(nconst SEPARATOR '; ') AS MainActorActress_nconst, AVG(age) AS Avg_age
     FROM TMP_TABLE
-    GROUP BY MediaTitle, averageRating
+    GROUP BY MediaTitle, averageRating;
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
