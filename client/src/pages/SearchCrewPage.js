@@ -75,9 +75,7 @@ export default function SearchPage() {
 
   return (
     <Container>
-      {/* {selectedCrewId && <MediaPage mediaId={selectedCrewId} handleClose={() => setSelectedCrewId(null)} />} */}
     <Typography variant ='h1' align='center'sx={{ 
-        color: 'secondary',
         fontFamily: 'monospace',
         fontWeight: 'bold',
         padding: '20px'

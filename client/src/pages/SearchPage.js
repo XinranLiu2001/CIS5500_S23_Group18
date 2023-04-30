@@ -67,7 +67,7 @@ export default function SearchPage() {
         <Link component={NavLink} to={`/media/${params.row.tconst}`}>{params.value}</Link>
     ), flex:3 },
     { field: 'startYear', headerName: 'Years', flex: 1 },
-    { field: 'runtimeMinutes', headerName: 'RuntimeMinutes', flex: 1}
+    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 1}
   ]
 
   return (
