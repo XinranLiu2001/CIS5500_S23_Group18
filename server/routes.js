@@ -233,7 +233,7 @@ const get_top5 = async function (req, res){
       connection.query(`
         SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
-        WHERE mb.startYear = ${year} AND mb.titleType = '${type}' AND rt.numVotes > 10000 
+        WHERE mb.startYear = ${year} AND mb.titleType = '${type}' AND rt.numVotes > 1000 
         ORDER BY rt.averageRating DESC, rt.numVotes DESC
         LIMIT 5
       `, (err, data) => {
@@ -248,7 +248,7 @@ const get_top5 = async function (req, res){
       connection.query(`
         SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
-        WHERE mb.titleType = '${type}' AND rt.numVotes > 10000 
+        WHERE mb.titleType = '${type}' AND rt.numVotes > 1000 
         ORDER BY rt.averageRating DESC, rt.numVotes DESC
         LIMIT 5
       `, (err, data) => {
@@ -265,7 +265,7 @@ const get_top5 = async function (req, res){
       connection.query(`
         SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
-        WHERE mb.startYear = ${year} AND rt.numVotes > 10000 
+        WHERE mb.startYear = ${year} AND rt.numVotes > 1000 
         ORDER BY rt.averageRating DESC, rt.numVotes DESC
         LIMIT 5
       `, (err, data) => {
@@ -280,7 +280,7 @@ const get_top5 = async function (req, res){
       connection.query(`
         SELECT mb.tconst, mb.primaryTitle, rt.averageRating, rt.numVotes FROM movie_basics mb
         JOIN ratings rt ON mb.tconst = rt.tconst
-        WHERE rt.numVotes > 10000
+        WHERE rt.numVotes > 1000
         ORDER BY rt.averageRating DESC, rt.numVotes DESC
         LIMIT 5
       `, (err, data) => {
