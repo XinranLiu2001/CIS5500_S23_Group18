@@ -15,44 +15,44 @@ connection.connect((err) => err && console.log(err));
 /**********************
  * Basic routes
  **********************/
-// Route 1: GET /search *combined with route 3
-// const search = async function(req, res) {
-//   const search_text = req.query.text
-//   if(search_text){
-//     connection.query(`
-//     SELECT DISTINCT title FROM
-//     (
-//       (
-//       SELECT titleId AS tconst, title AS title FROM akas
-//       WHERE X LIKE '${search_text}'
-//       )
-//       UNION
-//       (
-//       SELECT tconst, primaryTitle AS title FROM movie_basics
-//       WHERE X LIKE '${search_text}')
-//     )
-//     `, (err, data) => {
-//         if(err || data.length === 0){
-//           console.log(err);
-//           res.json([]);
-//         } else {
-//           res.json(data);
-//         }
-//       });
-//   } else {
-//     connection.query(`
-//       SELECT tconst, primaryTitle AS title FROM movie_basics
-//     `, (err, data) => {
-//         if(err || data.length === 0){
-//           console.log(err);
-//           res.json([]);
-//         } else {
-//           res.json(data);
-//         }
-//       });
-//   }
+// Route 1: GET /search 
+const search = async function(req, res) {
+  const search_text = req.query.text
+  if(search_text){
+    connection.query(`
+    SELECT DISTINCT title FROM
+    (
+      (
+      SELECT titleId AS tconst, title AS title FROM akas
+      WHERE X LIKE '${search_text}'
+      )
+      UNION
+      (
+      SELECT tconst, primaryTitle AS title FROM movie_basics
+      WHERE X LIKE '${search_text}')
+    )
+    `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+  } else {
+    connection.query(`
+      SELECT tconst, primaryTitle AS title FROM movie_basics
+    `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+  }
   
-// }
+}
 
 // TODO: need to modify the query, we need abbreviate info for each movie to display
 //Route 2: Get /type/:type
@@ -458,15 +458,13 @@ const get_crew_info = async function (req, res){
   });
 }
 
-// Route 13: GET /crew/:nconst
+// Route 13: GET /search_crew
 const search_crew_info = async function (req, res){
-  const nconst = req.params.nconst
   const search_text = req.query.name ?? '';
-  const isDead = req.query.isAdult === 'true' ? 1 : 0;
-  const startYear = req.query.startYear ?? 1888
-  const endYear = req.query.endYear ?? 2030
+  const isDead = req.query.dead === 'true' ? 1 : 0;
+  const startYear = req.query.startBirthYear ?? 1180
+  const endYear = req.query.endBirthYear ?? 2022
   const professions = req.query.professions ?? ''
-  const type = req.query.type ?? ''
   let profession1 = ''
   let profession2 = ''
   let profession3 = ''
@@ -541,7 +539,7 @@ const get_distinct_professions = async function (req, res){
 }
 
 module.exports = {
-  // search,
+  search,
   get_type,
   filter_movie,
   get_distinct_genres,

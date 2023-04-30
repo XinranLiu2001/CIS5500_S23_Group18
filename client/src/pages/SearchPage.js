@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
+import { Button, Checkbox, FormGroup, Switch, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import { DataGrid } from '@mui/x-data-grid';
 import { NavLink } from 'react-router-dom';
@@ -25,6 +25,10 @@ export default function SearchPage() {
     } else {
       setCheckedGenres([...checkedGenres, t]);
     }
+  };
+
+  const handleIsAdultChange = (event) => {
+    setIsAdult(event.target.checked);
   };
 
   useEffect(() => {
@@ -86,19 +90,23 @@ export default function SearchPage() {
           <TextField label='Title' value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
         </Grid>
         <Grid item xs={4}>
-          <FormControlLabel
-            label='Adult'
-            control={<Checkbox checked={isAdult} onChange={(e) => setIsAdult(e.target.checked)} />}
-          />
+        <FormGroup>
+            <FormControlLabel
+                control={<Switch color="warning" onChange={handleIsAdultChange} checked={isAdult} />}
+                label="Adult"
+            />
+        </FormGroup>
         </Grid>
         <h3>Type</h3>
         <Grid container spacing = {2}>
         <RadioGroup value={type} onChange={(event) => setType(event.target.value)} row>
         {types.map((t) => (
+            <Grid item key={t} xs={2}>
                 <FormControlLabel
                 value={t}
                 label={t}
                 control={<Radio />} />
+                </Grid>
             ))}
         </RadioGroup>
         </Grid>
@@ -115,7 +123,7 @@ export default function SearchPage() {
         </Grid>
 
         <Grid item xs={6}>
-          <p>Year range</p>
+          <p>Released Year Range</p>
           <Slider
             value={year}
             min={1888}
@@ -137,7 +145,7 @@ export default function SearchPage() {
           />
         </Grid>
       </Grid>
-      <Button onClick={() => search() } style={{ left: '50%', transform: 'translateX(-50%)' }}>
+      <Button onClick={() => search() } variant="contained" style={{ left: '50%', transform: 'translateX(-50%)' }}>
         Search
       </Button>
       <h2>Results</h2>

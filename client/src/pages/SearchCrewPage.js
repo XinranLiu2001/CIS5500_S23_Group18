@@ -13,7 +13,7 @@ export default function SearchPage() {
   const [profession, setProfession] = useState([]);
   const [checkedProfessions, setCheckedProfessions] = useState([]);
   const [name, setTitle] = useState('');
-  const [year, setYear] = useState([1888, 2030]);
+  const [year, setYear] = useState([1180, 2022]);
   const [isDead, setIsDead] = useState(false);
   
   // const toggleCheckedType = (t) => {
@@ -52,7 +52,13 @@ export default function SearchPage() {
   }, []);
 
   const search = () => {
-    const professionStr = checkedProfessions.join(",");
+    var professionStr = '';
+    if (checkedProfessions.length === 0){
+        professionStr = '';
+    } else {
+        professionStr = checkedProfessions.join(",");
+    }
+    console.log('The profession is:' + professionStr);
     fetch(`http://${config.server_host}:${config.server_port}/search_crew?name=${name}` +
       `&startBirthYear=${year[0]}&endBirthYear=${year[1]}` +
       `&dead=${isDead}&professions=${professionStr}`
@@ -84,7 +90,7 @@ export default function SearchPage() {
     </Typography>
       <Grid container spacing={6}>
         <Grid item xs={8}>
-            <TextField label='Name' value={name} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
+            <TextField label='Name' value={name} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%"}}/>
         </Grid>
         <Grid item xs={4}>
         <FormGroup>
@@ -106,19 +112,20 @@ export default function SearchPage() {
             ))}
         </Grid>
 
-        <Grid item xs={6}>
-          <p>Year range</p>
+        <Grid item xs={12}>
+          <p>Birth Year Range</p>
           <Slider
             value={year}
-            min={1888}
-            max={2030}
+            min={1180}
+            max={2022}
             step={1}
+            flex={1}
             onChange={(e, newValue) => setYear(newValue)}
             valueLabelDisplay='auto'
           />
         </Grid>
       </Grid>
-      <Button onClick={() => search() } style={{ left: '50%', transform: 'translateX(-50%)' }}>
+      <Button variant="contained" onClick={() => search() } style={{ left: '50%', transform: 'translateX(-50%)' }}>
         Search
       </Button>
       <h2>Results</h2>
