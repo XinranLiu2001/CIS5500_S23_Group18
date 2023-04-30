@@ -90,7 +90,7 @@ export default function HomePage() {
       </Typography>
       <Grid container spacing={4}>
         {types.map((type) => {
-          if (type.titleType === "tvPilot") {
+          if (type.titleType === "tvPilot" || type.titleType === "tvShort" || type.titleType === "tvEpisode") {
             return null; // Skip rendering the table
           }
           return <TypeTable key={type.titleType} titleType={type.titleType} />;
