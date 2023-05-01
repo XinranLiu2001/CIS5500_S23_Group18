@@ -414,8 +414,7 @@ const get_top1000 = async function (req, res){
     FROM L
     GROUP BY tconst) dd
     ON rs.tconst = dd.tconst
-    WHERE rs.rn <= 1000 and genre = '${genre}' and startYear = ${year}
-    limit 5;
+    WHERE rs.rn <= 5 and genre = '${genre}' and startYear = ${year};
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
