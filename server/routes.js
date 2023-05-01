@@ -192,8 +192,9 @@ const get_distinct_types = async function (req, res){
 const get_video_info = async function (req, res){
   const tconst = req.params.tconst
   connection.query(`
-    SELECT B.StartYear, B.EndYear, A.title, A.language, B.isAdult, B.titleType AS type FROM movie_basics B JOIN akas A
-    ON B.tconst = A.titleId WHERE B.tconst = '${tconst}';
+    SELECT B.StartYear, B.EndYear, B.originalTitle, A.title, A.language, B.isAdult, B.titleType, B.runtimeMinutes, B.genres
+    FROM movie_basics B LEFT JOIN akas A
+        ON B.tconst = A.titleId WHERE B.tconst = '${tconst}';
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -295,23 +296,27 @@ const get_top5 = async function (req, res){
   }
 }
 
-// Route 9: GET /movie_pop_crew
+// Route 9: GET /movie_pop_crew/:tconst
 const movie_pop_crew = async function (req, res){
+  const tconst = req.params.tconst
+
   connection.query(`
-    WITH TMP_TABLE AS(
-    SELECT T2.primaryTitle AS MediaTitle, D.averageRating, T2.People, T2.PersonName,
-    T2.Age, T2.nconst
-    FROM
-    (SELECT T1.tconst, T1.primaryTitle, T1.isAdult, T1.category AS People, C.primaryName AS PersonName, T1.nconst,
-    IF(C.deathYear IS NULL, 2023 - C.birthYear, C.deathYear - C.birthYear) AS age FROM
-    (SELECT A.tconst, A.primaryTitle, A.isAdult, A.startYear, B.category, B.nconst FROM movie_basics A
-    JOIN principals B ON A.tconst = B.tconst) T1
-    JOIN name_basics C ON C.nconst = T1.nconst
-    WHERE T1.category IN ('actress', 'actor') AND T1.isAdult = 0) T2 JOIN ratings D ON D.tconst = T2.tconst
-    WHERE D.averageRating > 5)
-    SELECT MediaTitle, averageRating, GROUP_CONCAT(PersonName SEPARATOR '; ') AS MainActorActress, GROUP_CONCAT(nconst SEPARATOR '; ') AS MainActorActress_nconst, AVG(age) AS Avg_age
-    FROM TMP_TABLE
-    GROUP BY MediaTitle, averageRating;
+  WITH TMP_TABLE AS(
+      SELECT T2.primaryTitle AS MediaTitle, D.averageRating, T2.People, T2.PersonName,
+      T2.Age, T2.nconst, T2.tconst AS Mediatconst
+      FROM
+      (SELECT T1.tconst, T1.primaryTitle, T1.isAdult, T1.category AS People, C.primaryName AS PersonName, T1.nconst,
+      IF(C.deathYear IS NULL, 2023 - C.birthYear, C.deathYear - C.birthYear) AS age FROM
+      (SELECT A.tconst, A.primaryTitle, A.isAdult, A.startYear, B.category, B.nconst FROM movie_basics A
+      JOIN principals B ON A.tconst = B.tconst) T1
+      JOIN name_basics C ON C.nconst = T1.nconst
+      WHERE T1.category IN ('actress', 'actor') AND T1.isAdult = 0) T2 JOIN ratings D ON D.tconst = T2.tconst
+      WHERE D.averageRating > 5)
+      SELECT Mediatconst, MediaTitle, averageRating, GROUP_CONCAT(PersonName SEPARATOR '; ') AS MainActorActress,
+            GROUP_CONCAT(nconst SEPARATOR '; ') AS MainActorActress_nconst, AVG(age) AS Avg_age
+      FROM TMP_TABLE
+      WHERE Mediatconst = '${tconst}'
+      GROUP BY MediaTitle, averageRating;
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -357,8 +362,10 @@ const rating_trend = async function (req, res){
   });
 }
 
-// Route 11: GET /top1000
+// Route 11: GET /top1000/:year/:genre
 const get_top1000 = async function (req, res){
+  const year = req.params.year
+  const genre = req.params.genre
   connection.query(`
     WITH C AS(
     SELECT movie_basics.tconst, SUBSTRING_INDEX(genres, ',', 1) AS genre
@@ -407,7 +414,7 @@ const get_top1000 = async function (req, res){
     FROM L
     GROUP BY tconst) dd
     ON rs.tconst = dd.tconst
-    WHERE rs.rn <= 1000;
+    WHERE rs.rn <= 5 and genre = '${genre}' and startYear = ${year};
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);

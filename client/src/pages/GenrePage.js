@@ -33,7 +33,7 @@ function TypeTable({ titleType }) {
   const [top5type, setTop5type] = useState([{}]);
 
   useEffect(() => {
-    fetch(`http://${config.server_host}:${config.server_port}/top5/2022/${titleType}`)
+    fetch(`http://${config.server_host}:${config.server_port}/top1000/2022/${titleType}`)
       .then(res => res.json())
       .then(resJson => setTop5type(resJson));
   }, []);
@@ -50,7 +50,7 @@ function TypeTable({ titleType }) {
               <TableRow>
                 <StyledTableCell>Title</StyledTableCell>
                 <StyledTableCell align="right">Average Rating</StyledTableCell>
-                <StyledTableCell align="right">Number of Votes</StyledTableCell>
+                <StyledTableCell align="right">Directors</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -58,11 +58,11 @@ function TypeTable({ titleType }) {
                 <StyledTableRow key={row.primaryTitle}>
                   <StyledTableCell component="th" scope="row" sx={{ width: '40%' }}>
                     <Link component={NavLink} to={`/media/${row.tconst}`}>
-                      {row.primaryTitle}
+                      {row.title}
                     </Link>
                   </StyledTableCell>
                   <StyledTableCell align="right" sx={{ width: '30%' }}>{row.averageRating}</StyledTableCell>
-                  <StyledTableCell align="right" sx={{ width: '30%' }}>{row.numVotes}</StyledTableCell>
+                  <StyledTableCell align="right" sx={{ width: '30%' }}>{row.directors}</StyledTableCell>
                 </StyledTableRow>
               ))}
             </TableBody>
@@ -73,27 +73,27 @@ function TypeTable({ titleType }) {
   );
 }
 
-export default function HomePage() {
-  const [types, setTypes] = useState([]);
+export default function GenrePage() {
+  const [genres, setGenres] = useState([]);
 
   useEffect(() => {
-    fetch(`http://${config.server_host}:${config.server_port}/distinct_types`)
+    fetch(`http://${config.server_host}:${config.server_port}/distinct_genres`)
       .then(res => res.json())
-      .then(resJson => setTypes(resJson));
+      .then(resJson => setGenres(resJson));
   }, []);
 
   return (
     <div>
       <Container sx={{ py: 4 }}>
       <Typography variant="h4" sx={{ mb: 4 }}>
-        Trending for Different Types of Media
+        Trending for Different Genres
       </Typography>
       <Grid container spacing={4}>
-        {types.map((type) => {
-          if (type.titleType === "tvPilot" || type.titleType === "tvShort" || type.titleType === "tvEpisode") {
-            return null; // Skip rendering the table
+        {genres.map((type) => {
+          if (type.genre === "Action" || type.genre === "Adventure" || type.genre === "Crime") {
+            return <TypeTable key={type.genre} titleType={type.genre} />;
           }
-          return <TypeTable key={type.titleType} titleType={type.titleType} />;
+          return null;
         })}
       </Grid>
       
