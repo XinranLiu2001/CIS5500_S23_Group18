@@ -29,7 +29,11 @@ export default function SearchPage() {
   // };
 
   const handleSelectedType = (event, type) => {
-    setType(type);
+    if (!type) {
+      setType("");
+    } else {
+      setType(type);
+    }
   };
   
 
@@ -79,11 +83,11 @@ export default function SearchPage() {
 
   const columns = [
     { field: 'primaryTitle', headerName: 'Title', renderCell: (params) => (
-        <Link component={NavLink} to={`/media/${params.row.tconst}`} color="secondary">{params.value}</Link>
-    ), flex:3 },
-    { field: 'startYear', headerName: 'Years', flex: 1 },
-    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 1},
-    { field: 'titleType', headerName: 'Type', flex:1,cellClassName: (params) => {
+        <Link component={NavLink} to={`/media/${params.row.tconst}`} color="secondary" style={{ color: '#FFA000' }}>{params.value}</Link>
+    ), flex:3, headerClassName:'cell12'},
+    { field: 'startYear', headerName: 'Years', flex: 1, headerClassName:'cell12' },
+    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 1.5, headerClassName:'cell12'},
+    { field: 'titleType', headerName: 'Type', flex:1, headerClassName:'cell12', cellClassName: (params) => {
       const type = params.value;
       switch (type) {
         case 'movie':
@@ -114,7 +118,8 @@ export default function SearchPage() {
           return 'cell12';
       }
     },},
-    { field: 'genres', headerName: 'Genre', flex:2}
+    { field: 'isAdult', headerName: 'Adult', headerClassName:'cell12', flex:1},
+    { field: 'genres', headerName: 'Genre', headerClassName:'cell12', flex:2}
   ]
 
   return (

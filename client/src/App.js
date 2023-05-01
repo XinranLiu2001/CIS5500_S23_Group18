@@ -14,6 +14,7 @@ import SearchCrewPage from './pages/SearchCrewPage';
 import CrewPage from './pages/CrewPage';
 import MediaPage from './pages/MediaPage';
 import GenrePage from './pages/GenrePage';
+import PopularCrewPage from './pages/PopularCrewPage';
 
 // createTheme
 export const theme = createTheme({
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/crew/:crewid" element={<CrewPage />}/>
           <Route path="/media/:mediaid" element={<MediaPage />}/>
           <Route path="/genres" element={<GenrePage />}/>
+          <Route path="/pop_people" element={<PopularCrewPage />}/>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

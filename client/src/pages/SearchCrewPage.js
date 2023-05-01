@@ -67,12 +67,15 @@ export default function SearchPage() {
   }
 
   const columns = [
-    { field: 'primaryName', headerName: 'Name', width: 300, renderCell: (params) => (
-        <Link component={NavLink} to={`/crew/${params.row.nconst}`} color="secondary">{params.value}</Link>
-    ), flex: 1}
-    // { field: 'startYear', headerName: 'Years' },
-    // { field: 'runtimeMinutes', headerName: 'RuntimeMinutes' },
-    // { field: 'isAdult', headerName: 'Adult' },
+    { field: 'primaryName', headerName: 'Name', renderCell: (params) => (
+        <Link component={NavLink} to={`/crew/${params.row.nconst}`} color="secondary" style={{ color: '#FFA000' }} >{params.value}</Link>
+    ), flex: 3, headerClassName:'cell12',},
+    { field: 'birthYear', headerName: 'Birth Year' , headerClassName:'cell12', flex: 1},
+    { field: 'dead', headerName: 'Dead' , headerClassName:'cell12', flex: 1, cellClassName: (params) => {
+        const type = params.value;
+        if(type === 1) return 'cell1';
+        return 'cell5';
+    },},
   ]
 
   return (
@@ -88,9 +91,12 @@ export default function SearchPage() {
         <Grid item xs={8}>
             <TextField label='Name' value={name} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%"}}/>
         </Grid>
+        <Grid item xs = {8}>
+            <Link component={NavLink} to={`/pop_people`} color="secondary" style={{ color: '#FFA000' }} >Want to see some popular actors/actresses in the industry?</Link>
+        </Grid>
         <Grid item xs={4}>
             <Button color="secondary" variant="contained" onClick={() => search() } style={{ left: '50%', transform: 'translateX(-50%)', color: 'warning'}}>
-            Search
+                Search
             </Button>
         </Grid>
         <Grid item xs={12}>

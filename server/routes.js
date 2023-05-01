@@ -98,50 +98,77 @@ const filter_movie = async function (req, res){
     genre3 = genres_split[2];
   } else if (genres_split.length > 3){
     res.json([]);
+    return;
   } else {
     console.log('no genre');
   }
 
   if(type == ''){
-    connection.query(`
-      WITH tmp_table AS(
-        SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
-        isAdult, startYear, runtimeMinutes
-      FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
-      GROUP BY genres, primaryTitle)
-
-      SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType FROM tmp_table
-      WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
-      AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
-      AND isAdult = ${isAdult}
-      AND startYear >= ${startYear}
-      AND startYear <= ${endYear}
-      AND runtimeMinutes >= ${runtimeMinutesLow}
-      AND runtimeMinutes <= ${runtimeMinutesHigh};
-    `, (err, data) => {
-        if(err || data.length === 0){
-          console.log(err);
-          res.json([]);
-        } else {
-          res.json(data);
-        }
-      });
-  } else {
+    if(isAdult === 1){
       connection.query(`
-      WITH tmp_table AS(SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
-      isAdult, startYear, runtimeMinutes
-      FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
-      GROUP BY genres, primaryTitle)
+        WITH tmp_table AS(
+          SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
+          isAdult, startYear, runtimeMinutes
+        FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
+        GROUP BY genres, primaryTitle)
 
-      SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType FROM tmp_table
-      WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
-      AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
-      AND titleType = '${type}'
-      AND isAdult = ${isAdult}
-      AND startYear >= ${startYear}
-      AND startYear <= ${endYear}
-      AND runtimeMinutes >= ${runtimeMinutesLow}
-      AND runtimeMinutes <= ${runtimeMinutesHigh};
+        SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
+        WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
+        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND isAdult = ${isAdult}
+        AND startYear >= ${startYear}
+        AND startYear <= ${endYear}
+        AND runtimeMinutes >= ${runtimeMinutesLow}
+        AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+          if(err || data.length === 0){
+            console.log(err);
+            res.json([]);
+          } else {
+            res.json(data);
+          }
+        });
+    } else {
+      connection.query(`
+        WITH tmp_table AS(
+          SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
+          isAdult, startYear, runtimeMinutes
+        FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
+        GROUP BY genres, primaryTitle)
+
+        SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
+        WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
+        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND startYear >= ${startYear}
+        AND startYear <= ${endYear}
+        AND runtimeMinutes >= ${runtimeMinutesLow}
+        AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+          if(err || data.length === 0){
+            console.log(err);
+            res.json([]);
+          } else {
+            res.json(data);
+          }
+        });
+    }
+  } else {
+    if(isAdult === 1){
+      connection.query(`
+        WITH tmp_table AS(SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
+        isAdult, startYear, runtimeMinutes
+        FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
+        GROUP BY genres, primaryTitle)
+
+        SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
+        WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
+        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND titleType = '${type}'
+        AND isAdult = ${isAdult}
+        AND startYear >= ${startYear}
+        AND startYear <= ${endYear}
+        AND runtimeMinutes >= ${runtimeMinutesLow}
+        AND runtimeMinutes <= ${runtimeMinutesHigh};
       `, (err, data) => {
         if(err || data.length === 0){
           console.log(err);
@@ -150,6 +177,30 @@ const filter_movie = async function (req, res){
           res.json(data);
         }
       });
+    } else {
+      connection.query(`
+        WITH tmp_table AS(SELECT mb.tconst, genres, primaryTitle, titleType, GROUP_CONCAT(DISTINCT a.title SEPARATOR '; ') AS otherTitles,
+        isAdult, startYear, runtimeMinutes
+        FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
+        GROUP BY genres, primaryTitle)
+
+        SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
+        WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
+        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND titleType = '${type}'
+        AND startYear >= ${startYear}
+        AND startYear <= ${endYear}
+        AND runtimeMinutes >= ${runtimeMinutesLow}
+        AND runtimeMinutes <= ${runtimeMinutesHigh};
+      `, (err, data) => {
+        if(err || data.length === 0){
+          console.log(err);
+          res.json([]);
+        } else {
+          res.json(data);
+        }
+      });
+    }
   }
 }
 
@@ -424,12 +475,14 @@ const get_top1000 = async function (req, res){
     }
   });
 }
-
+ 
 // Route 12: GET /pop_people_media
 // complex enough? doesn't make sense
 const pop_people_media = async function (req, res){
+  const rating_low = req.query.startRating ?? 0;
+  const rating_hi = req.query.endRating ?? 10;
   connection.query(`
-    SELECT primaryName, GROUP_CONCAT(primaryTitle SEPARATOR '; ') AS all_shows FROM (
+    SELECT nconst, primaryName, GROUP_CONCAT(primaryTitle SEPARATOR '; ') AS all_shows, GROUP_CONCAT(nconst SEPARATOR '; ') AS all_nconst FROM (
     WITH actorActress AS (
     SELECT p.nconst, p.category, nb.primaryName
     FROM principals p JOIN name_basics nb on p.nconst = nb.nconst WHERE tconst IN(
@@ -438,11 +491,11 @@ const pop_people_media = async function (req, res){
     SELECT titleId, COUNT(*) as numArea FROM akas
     GROUP BY titleId
     ) T1
-    WHERE numArea >= 5) AND category IN ('actress', 'actor'))
+    WHERE numArea >= 1) AND category IN ('actress', 'actor'))
     SELECT A.*, B.tconst, mb.primaryTitle, r.averageRating FROM actorActress A JOIN principals B
     ON A.nconst = B.nconst
     JOIN movie_basics mb on B.tconst = mb.tconst
-    JOIN ratings r on mb.tconst = r.tconst WHERE r.averageRating > 6) A GROUP BY primaryName;
+    JOIN ratings r on mb.tconst = r.tconst WHERE r.averageRating >= ${rating_low} AND r.averageRating <= ${rating_hi}) A GROUP BY primaryName;
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -498,7 +551,7 @@ const search_crew_info = async function (req, res){
 
   if(isDead === 1){
     connection.query(`
-      SELECT nconst, primaryName FROM name_basics
+      SELECT nconst, primaryName, birthYear, 1 AS dead FROM name_basics
       WHERE primaryProfession LIKE '%${profession1}%' AND primaryProfession LIKE '%${profession2}%' AND primaryProfession LIKE '%${profession3}%'
       AND primaryName LIKE '%${search_text}%'
       AND deathYear IS NOT NULL
@@ -514,7 +567,7 @@ const search_crew_info = async function (req, res){
       });
   } else {
       connection.query(`
-      SELECT nconst, primaryName FROM name_basics
+      SELECT nconst, primaryName, birthYear, IF(deathYear IS NULL, 0, 1) AS dead FROM name_basics
       WHERE primaryProfession LIKE '%${profession1}%' AND primaryProfession LIKE '%${profession2}%' AND primaryProfession LIKE '%${profession3}%'
       AND primaryName LIKE '%${search_text}%'
       AND birthYear >= ${startYear}
