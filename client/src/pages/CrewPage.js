@@ -46,7 +46,7 @@ export default function CrewPage() {
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={crewTrend}>
             <XAxis dataKey="startYear" />
-            <YAxis />
+            <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]}/>
             <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
             <Tooltip />
             <Legend />

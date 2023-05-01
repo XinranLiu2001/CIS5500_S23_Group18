@@ -15,65 +15,8 @@ connection.connect((err) => err && console.log(err));
 /**********************
  * Basic routes
  **********************/
-// Route 1: GET /search 
-const search = async function(req, res) {
-  const search_text = req.query.text
-  if(search_text){
-    connection.query(`
-    SELECT DISTINCT title FROM
-    (
-      (
-      SELECT titleId AS tconst, title AS title FROM akas
-      WHERE X LIKE '${search_text}'
-      )
-      UNION
-      (
-      SELECT tconst, primaryTitle AS title FROM movie_basics
-      WHERE X LIKE '${search_text}')
-    )
-    `, (err, data) => {
-        if(err || data.length === 0){
-          console.log(err);
-          res.json([]);
-        } else {
-          res.json(data);
-        }
-      });
-  } else {
-    connection.query(`
-      SELECT tconst, primaryTitle AS title FROM movie_basics
-    `, (err, data) => {
-        if(err || data.length === 0){
-          console.log(err);
-          res.json([]);
-        } else {
-          res.json(data);
-        }
-      });
-  }
-  
-}
 
-// TODO: need to modify the query, we need abbreviate info for each movie to display
-//Route 2: Get /type/:type
-const get_type = async function (req, res){
-  const type = req.params.type
-  connection.query(`
-    SELECT tconst, primaryTitle, startYear
-    FROM movie_basics
-    WHERE titleType = '${type}';
-  `, (err, data) => {
-    if(err || data.length === 0){
-      console.log(err);
-      res.json([]);
-    } else {
-      res.json(data);
-    }
-  });
-}
-
-//Route 3: GET /filter_movie
-//genre type: "a,b,c" 
+//Route 1: GET /filter_movie
 const filter_movie = async function (req, res){
   const search_text = req.query.search_text ?? '';
   const isAdult = req.query.isAdult === 'true' ? 1 : 0;
@@ -204,7 +147,7 @@ const filter_movie = async function (req, res){
   }
 }
 
-//Route 4: GET /distinct_genres
+//Route 2: GET /distinct_genres
 const get_distinct_genres = async function (req, res){
   connection.query(`
     WITH separate_genres
@@ -225,7 +168,7 @@ const get_distinct_genres = async function (req, res){
   });
 }
 
-//Route 5: GET /distinct_types
+//Route 3: GET /distinct_types
 const get_distinct_types = async function (req, res){
   connection.query(`
     SELECT DISTINCT titleType FROM movie_basics ORDER BY titleType;
@@ -239,7 +182,7 @@ const get_distinct_types = async function (req, res){
   });
 }
 
-//Route 6: GET /video/:tconst
+//Route 4: GET /video/:tconst
 const get_video_info = async function (req, res){
   const tconst = req.params.tconst
   connection.query(`
@@ -256,8 +199,7 @@ const get_video_info = async function (req, res){
   });
 }
 
-//Route 7: GET /video_crew/:tconst
-// add nconst
+//Route 5: GET /video_crew/:tconst
 const get_video_crew = async function (req, res){
   const tconst = req.params.tconst
   connection.query(`
@@ -275,8 +217,7 @@ const get_video_crew = async function (req, res){
   });
 }
 
-// Route 8: GET /top5/:year/:type
-// add tconst change!!!! show add limitation 
+// Route 6: GET /top5/:year/:type
 const get_top5 = async function (req, res){
   const year = req.params.year
   const type = req.params.type ?? ''
@@ -347,7 +288,7 @@ const get_top5 = async function (req, res){
   }
 }
 
-// Route 9: GET /movie_pop_crew/:tconst
+// Route 7: GET /movie_pop_crew/:tconst
 const movie_pop_crew = async function (req, res){
   const tconst = req.params.tconst
 
@@ -378,8 +319,7 @@ const movie_pop_crew = async function (req, res){
   });
 }
 
-// Route 10: GET /rating_trend/:crew
-// simple?
+// Route 8: GET /rating_trend/:crew
 const rating_trend = async function (req, res){
   const crewid = req.params.crew
   connection.query(`
@@ -413,7 +353,7 @@ const rating_trend = async function (req, res){
   });
 }
 
-// Route 11: GET /top1000/:year/:genre
+// Route 9: GET /top1000/:year/:genre
 const get_top1000 = async function (req, res){
   const year = req.params.year
   const genre = req.params.genre
@@ -476,8 +416,7 @@ const get_top1000 = async function (req, res){
   });
 }
  
-// Route 12: GET /pop_people_media
-// complex enough? doesn't make sense
+// Route 10: GET /pop_people_media
 const pop_people_media = async function (req, res){
   const rating_low = req.query.startRating ?? 0;
   const rating_hi = req.query.endRating ?? 10;
@@ -506,7 +445,7 @@ const pop_people_media = async function (req, res){
   });
 }
 
-// Route 13: GET /crew/:nconst
+// Route 11: GET /crew/:nconst
 const get_crew_info = async function (req, res){
   const nconst = req.params.nconst
   connection.query(`
@@ -523,7 +462,7 @@ const get_crew_info = async function (req, res){
   });
 }
 
-// Route 13: GET /search_crew
+// Route 12: GET /search_crew
 const search_crew_info = async function (req, res){
   const search_text = req.query.name ?? '';
   const isDead = req.query.dead === 'true' ? 1 : 0;
@@ -583,6 +522,7 @@ const search_crew_info = async function (req, res){
   }
 }
 
+// Route 13: GET /distinct_professions
 const get_distinct_professions = async function (req, res){
   connection.query(`
     WITH separate_professions
@@ -604,8 +544,6 @@ const get_distinct_professions = async function (req, res){
 }
 
 module.exports = {
-  search,
-  get_type,
   filter_movie,
   get_distinct_genres,
   get_distinct_types,

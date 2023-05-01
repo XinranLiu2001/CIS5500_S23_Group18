@@ -234,6 +234,7 @@ export default function SearchPage() {
       <h2>Results</h2>
       <DataGrid
         rows={data}
+        getRowId={(row) => row.id}
         columns={columns}
         pageSize={pageSize}
         checkboxSelection={false} 

@@ -44,6 +44,7 @@ export default function PopularCrew() {
       for (let i = 0; i < show_split.length; i++) {
           const link = (
               <Link
+              key={i} 
               component={NavLink}
               to={`/media/${nconst_split[i]}`}
               color="secondary"
@@ -93,6 +94,7 @@ export default function PopularCrew() {
       <h2>Results</h2>
       <DataGrid
         rows={data}
+        getRowId={(row) => row.id}
         columns={columns}
         pageSize={pageSize}
         rowsPerPageOptions={[5, 10, 25]}

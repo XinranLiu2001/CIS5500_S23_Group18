@@ -10,8 +10,6 @@ app.use(cors({
 
 // API endpoints
 // handlers in routes.js
-app.get('/search', routes.search);
-app.get('/type/:type', routes.get_type);
 app.get('/filter_movie', routes.filter_movie);
 app.get('/distinct_genres', routes.get_distinct_genres);
 app.get('/distinct_types', routes.get_distinct_types);

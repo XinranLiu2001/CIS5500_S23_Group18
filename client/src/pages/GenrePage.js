@@ -47,15 +47,15 @@ function TypeTable({ titleType }) {
         <TableContainer component={Paper} >
           <Table sx={{ minWidth: 300 }} aria-label="customized table">
             <TableHead>
-              <TableRow>
-                <StyledTableCell>Title</StyledTableCell>
-                <StyledTableCell align="right">Average Rating</StyledTableCell>
-                <StyledTableCell align="right">Directors</StyledTableCell>
-              </TableRow>
+            <TableRow key="table-header-row">
+              <StyledTableCell key="title-header">Title</StyledTableCell>
+              <StyledTableCell key="average-rating-header" align="right">Average Rating</StyledTableCell>
+              <StyledTableCell key="directors-header" align="right">Directors</StyledTableCell>
+            </TableRow>
             </TableHead>
             <TableBody>
               {top5type.map((row) => (
-                <StyledTableRow key={row.primaryTitle}>
+                <StyledTableRow key={row.tconst}>
                   <StyledTableCell component="th" scope="row" sx={{ width: '40%' }}>
                     <Link component={NavLink} to={`/media/${row.tconst}`}>
                       {row.title}
