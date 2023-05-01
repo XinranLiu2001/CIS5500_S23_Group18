@@ -110,7 +110,7 @@ const filter_movie = async function (req, res){
       FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
       GROUP BY genres, primaryTitle)
 
-      SELECT tconst, primaryTitle, startYear, runtimeMinutes FROM tmp_table
+      SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType FROM tmp_table
       WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
       AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
       AND isAdult = ${isAdult}
@@ -133,7 +133,7 @@ const filter_movie = async function (req, res){
       FROM movie_basics mb JOIN akas a on mb.tconst = a.titleID
       GROUP BY genres, primaryTitle)
 
-      SELECT tconst, primaryTitle, startYear, runtimeMinutes FROM tmp_table
+      SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType FROM tmp_table
       WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
       AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
       AND titleType = '${type}'

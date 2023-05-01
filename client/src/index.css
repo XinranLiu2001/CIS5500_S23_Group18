@@ -11,3 +11,45 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.cell1 {
+  background-color: #FFF8EB;
+}
+
+.cell2 {
+  background-color: #FFF1D6;
+}
+
+.cell3 {
+  background-color: #FFEBC2;
+}
+
+.cell4{
+  background-color: #FFE4AD;
+}
+
+.cell5{
+  background-color: #FFDD99;
+}
+
+.cell6{
+  background-color: #FFD685;
+}
+.cell7{
+  background-color: #FFCF70;
+}
+.cell8{
+  background-color: #FFC95C;
+}
+.cell9{
+  background-color: #FFC247;
+}
+.cell10{
+  background-color: #FFBB33;
+}
+.cell11{
+  background-color: #FFB41F;
+}
+.cell12{
+  background-color: #FFAD0A;
+}

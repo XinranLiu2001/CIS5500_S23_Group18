@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, FormGroup, Switch, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
+import { Button, Checkbox, Autocomplete, FormGroup, Switch, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 import { DataGrid } from '@mui/x-data-grid';
 import { NavLink } from 'react-router-dom';
@@ -13,24 +13,34 @@ export default function SearchPage() {
   const [genre, setGenre] = useState([]);
   const [type, setType] = useState('');
   const [types, setTypes] = useState([]);
-  const [checkedGenres, setCheckedGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  // const [checkedGenres, setCheckedGenres] = useState([]);
   const [title, setTitle] = useState('');
   const [year, setYear] = useState([1888, 2030]);
   const [runtimeMinutes, setTime] = useState([0, 43200]);
   const [isAdult, setIsAdult] = useState(false);
 
-  const toggleCheckedGenre = (t) => {
-    if (checkedGenres.includes(t)) {
-      setCheckedGenres(checkedGenres.filter((_t) => _t !== t));
-    } else {
-      setCheckedGenres([...checkedGenres, t]);
-    }
-  };
+  // const toggleCheckedGenre = (t) => {
+  //   if (checkedGenres.includes(t)) {
+  //     setCheckedGenres(checkedGenres.filter((_t) => _t !== t));
+  //   } else {
+  //     setCheckedGenres([...checkedGenres, t]);
+  //   }
+  // };
 
+  const handleSelectedType = (event, type) => {
+    setType(type);
+  };
+  
+
+  const handleSelectedGenres = (event, selectedGenres) => {
+    setSelectedGenres(selectedGenres);
+  };
+  
   const handleIsAdultChange = (event) => {
     setIsAdult(event.target.checked);
   };
-
+  
   useEffect(() => {
     fetch(`http://${config.server_host}:${config.server_port}/distinct_types`)
         .then(res => res.json())
@@ -53,7 +63,8 @@ export default function SearchPage() {
   }, []);
 
   const search = () => {
-    const genreStr = checkedGenres.join(",");
+    // const genreStr = checkedGenres.join(",");
+    const genreStr = selectedGenres.join(",");
     fetch(`http://${config.server_host}:${config.server_port}/filter_movie?title=${title}` +
       `&startYear=${year[0]}&endYear=${year[1]}` +
       `&runtimeMinutesLow=${runtimeMinutes[0]}&runtimeMinutesHigh=${runtimeMinutes[1]}` +
@@ -68,38 +79,66 @@ export default function SearchPage() {
 
   const columns = [
     { field: 'primaryTitle', headerName: 'Title', renderCell: (params) => (
-        <Link component={NavLink} to={`/media/${params.row.tconst}`}>{params.value}</Link>
+        <Link component={NavLink} to={`/media/${params.row.tconst}`} color="secondary">{params.value}</Link>
     ), flex:3 },
     { field: 'startYear', headerName: 'Years', flex: 1 },
-    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 1}
+    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 1},
+    { field: 'titleType', headerName: 'Type', flex:1,cellClassName: (params) => {
+      const type = params.value;
+      switch (type) {
+        case 'movie':
+          return 'cell1';
+        case 'tvSeries':
+          return 'cell2';
+        case 'short':
+          return 'cell3';
+        case 'tvMovie':
+          return 'cell4';
+        case 'tvMiniSeries':
+          return 'cell5';
+        case 'tvPilot':
+          return 'cell6';
+        case 'tvSpecial':
+          return 'cell7';
+        case 'tvEpisode':
+          return 'cell8';
+        case 'tvSeries':
+          return 'cell9';
+        case 'tvShort':
+          return 'cell10';
+        case 'video':
+          return 'cell11';
+        case 'videoGame':
+          return 'cell12';
+        default:
+          return 'cell12';
+      }
+    },},
+    { field: 'genres', headerName: 'Genre', flex:2}
   ]
 
   return (
     <Container>
       {/* {selectedVideoId && <MediaPage mediaId={selectedVideoId} handleClose={() => setSelectedVideoId(null)} />} */}
       <Typography variant ='h1' align='center'sx={{ 
-        color: 'secondary',
         fontFamily: 'monospace',
         fontWeight: 'bold',
         padding: '20px'
       }}>
         Search Videos
       </Typography>
-      <Grid container spacing={6}>
+      <Grid container spacing={4}>
         <Grid item xs={8}>
-          <TextField label='Title' value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
+          <TextField label="Search for a video's title or akas" value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
         </Grid>
         <Grid item xs={4}>
-        <FormGroup>
-            <FormControlLabel
-                control={<Switch color="warning" onChange={handleIsAdultChange} checked={isAdult} />}
-                label="Adult"
-            />
-        </FormGroup>
+        <Button color="secondary" onClick={() => search() } variant="contained" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+          Search
+        </Button>
         </Grid>
-        <h3>Type</h3>
-        <Grid container spacing = {2}>
-        <RadioGroup value={type} onChange={(event) => setType(event.target.value)} row>
+        <h2>Features</h2>
+        <Grid container spacing = {4} justifyContent="center">
+        {/* <RadioGroup value={type} onChange={(event) => setType(event.target.value)} row>
         {types.map((t) => (
             <Grid item key={t} xs={2}>
                 <FormControlLabel
@@ -108,23 +147,56 @@ export default function SearchPage() {
                 control={<Radio />} />
                 </Grid>
             ))}
-        </RadioGroup>
+        </RadioGroup> */}
+        <Grid item>
+        <Autocomplete
+          color="secondary"
+          id="single type"
+          options={types}
+          value={type}
+          onChange={handleSelectedType}
+          getOptionLabel={(option) => option}
+          renderInput={(params) => (
+            <TextField color="warning" {...params} label="Type" />
+          )}
+          sx={{ width: '500px', '& .MuiOutlinedInput-notchedOutline': { borderColor: 'grey' },
+              '&:focus-within .MuiOutlinedInput-notchedOutline': { borderColor: 'yellow' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'yellow' }, }}
+        />
         </Grid>
-        <h3>Genre</h3>
-        <Grid container spacing = {2}>
-        {genre.map((g) => (
+
+        {/* {genre.map((g) => (
             <Grid item key={g} xs={2}>
                 <FormControlLabel
                 label={g}
                 control={<Checkbox checked={checkedGenres.includes(g)} onChange={() => toggleCheckedGenre(g)} />}
                 />
             </Grid>
-            ))}
+            ))} */}
+            <Grid item>
+            <Autocomplete
+              color="secondary"
+              multiple
+              limitTags={3}
+              id="multiple-limit-genres"
+              options={genre}
+              value={selectedGenres}
+              onChange={handleSelectedGenres}
+              getOptionLabel={(option) => option}
+              renderInput={(params) => (
+                <TextField color="warning" {...params} label="Genre" />
+              )}
+              sx={{ width: '500px', '& .MuiOutlinedInput-notchedOutline': { borderColor: 'grey' },
+              '&:focus-within .MuiOutlinedInput-notchedOutline': { borderColor: 'yellow' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'yellow' }, }}
+            />
+            </Grid>
         </Grid>
 
         <Grid item xs={6}>
           <p>Released Year Range</p>
           <Slider
+            color="secondary"
             value={year}
             min={1888}
             max={2030}
@@ -136,6 +208,7 @@ export default function SearchPage() {
         <Grid item xs={6}>
           <p>Duration</p>
           <Slider
+            color="secondary"
             value={runtimeMinutes}
             min={0}
             max={43200}
@@ -144,10 +217,15 @@ export default function SearchPage() {
             valueLabelDisplay='auto'
           />
         </Grid>
+        <Grid item xs={8}>
+        <FormGroup>
+            <FormControlLabel
+                control={<Switch color="warning" onChange={handleIsAdultChange} checked={isAdult} />}
+                label="Adult"
+            />
+        </FormGroup>
+        </Grid>
       </Grid>
-      <Button onClick={() => search() } variant="contained" style={{ left: '50%', transform: 'translateX(-50%)' }}>
-        Search
-      </Button>
       <h2>Results</h2>
       <DataGrid
         rows={data}
