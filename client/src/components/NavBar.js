@@ -35,7 +35,7 @@ export default function NavBar() {
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
           <NavText href='/' text='IMDB' isMain />
-          <NavText href='/movies' text='MOVIES' />
+          <NavText href='/genres' text='GENRES' />
           <NavText href='/search_video' text='SEARCH VIDEOS' />
           <NavText href='/search_crew' text='SEARCH CREWS' />
         </Toolbar>

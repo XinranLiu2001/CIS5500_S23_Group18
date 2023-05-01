@@ -7,6 +7,8 @@ const config = require('../config.json');
 export default function MediaPage() {
   const [mediaInfo, setMediaInfo] = useState([]);
   const [crewInfo, setCrewInfo] = useState([]);
+  const [popInfo, setPopInfo] = useState([]);
+
   const {mediaid} = useParams();
 
   useEffect(() => {
@@ -17,21 +19,46 @@ export default function MediaPage() {
     fetch(`http://${config.server_host}:${config.server_port}/video_crew/${mediaid}`)
       .then(res => res.json())
       .then(resJson => setCrewInfo(resJson));
+    fetch(`http://${config.server_host}:${config.server_port}/movie_pop_crew/${mediaid}`)
+      .then(res => res.json())
+      .then(resJson => setPopInfo(resJson));
   }, [mediaid]);
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f5f5f5' }}>
+    <Container>
+    {/* <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f5f5f5' }}> */}
       <Container maxWidth="md">
+        <Typography align='center' variant="h3" sx={{ mb: 2, mt:4 }}>
+        {mediaInfo.length > 0 ? (
+          <Typography align='center' variant="h3" sx={{ mb: 2 }}>
+            {mediaInfo[0].originalTitle ? mediaInfo[0].originalTitle : 'N/A'}
+          </Typography>
+        ) : (
+          <Typography align='center' variant="h3" sx={{ mb: 2 }}>
+          </Typography>
+        )}
+          {/* {mediaInfo[0].title ? mediaInfo[0].title : 'N/A'} */}
+        </Typography>        
         <Typography variant="h4" sx={{ mb: 2 }}>
           Media Info
         </Typography>
         {mediaInfo.length > 0 ? (
           <List>
+            <ListItem>
+              {`Runtime: ${mediaInfo[0].runtimeMinutes? mediaInfo[0].runtimeMinutes : 'N/A'} minutes`}
+            </ListItem>
+            <ListItem>
+              {`Genre: ${mediaInfo[0].genres? mediaInfo[0].genres : 'N/A'}`}
+            </ListItem>
+            <ListItem>
+              {`Adult: ${mediaInfo[0].isAdult? 'Yes' : 'No'}`}
+            </ListItem>
             {mediaInfo.map((media, index) => (
               <ListItem key={index}>
                 <ListItemText
-                  primary={`${media.title} (${media.language})`}
-                  secondary={`Genres: ${media.genres}, Type: ${media.type}, Adult: ${media.isAdult ? 'Yes' : 'No'}`}
+                  primary={media.title ? 'Title in Different Region:' :""}
+                  secondary={media.title ? `${media.title} (Language: ${media.language})` : ""}
+                  // secondary={`Runtime: ${media.runtimeMinutes}, Adult: ${media.isAdult ? 'Yes' : 'No'}`}
                 />
               </ListItem>
             ))}
@@ -64,7 +91,31 @@ export default function MediaPage() {
             No crew information available for this video.
           </Typography>
         )}
+        <Typography variant="h4" sx={{ mt: 4, mb: 2 }}>
+          Pop Crew Info
+        </Typography>
+        {popInfo.length > 0 ? (
+          <List>
+            {popInfo.map((pop, index) => (
+              <ListItem key={index}>
+                <ListItemText
+                  primary={
+                    // <Link to={`/crew/${pop.MainActorActress_nconst}`}>
+                      pop.MainActorActress ? pop.MainActorActress : 'N/A'
+                    // </Link>
+                  }
+                  secondary={`Average Rating: ${pop.averageRating ? pop.averageRating : 'N/A'}, Average Age: ${pop.Avg_age ? pop.Avg_age : 'N/A'}`}
+                />
+              </ListItem>
+            ))}
+          </List>
+        ) : (
+          <Typography variant="body2">
+            No crew information available for this video.
+          </Typography>
+        )}
       </Container>
-    </div>
+    {/* </div> */}
+    </Container>
   );
 }
