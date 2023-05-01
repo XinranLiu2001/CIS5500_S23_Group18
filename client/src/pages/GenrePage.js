@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Link, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Container, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { tableCellClasses } from '@mui/material/TableCell';
 import Paper from '@mui/material/Paper';
@@ -29,14 +29,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-function TypeTable({ titleType }) {
-  const [top5type, setTop5type] = useState([{}]);
 
-  useEffect(() => {
-    fetch(`http://${config.server_host}:${config.server_port}/top1000/2022/${titleType}`)
-      .then(res => res.json())
-      .then(resJson => setTop5type(resJson));
-  }, []);
+function TypeTable({ titleType, top5type }) {
+  // const { titleType, top5type } = props;
 
   return (
     <Grid item xs={12} md={6} lg={4}>
@@ -54,7 +49,13 @@ function TypeTable({ titleType }) {
             </TableRow>
             </TableHead>
             <TableBody>
-              {top5type.map((row) => (
+              {top5type
+              .filter((row) => {
+                // console.log(row.genre)
+                // console.log({titleType})
+                return row.genre === titleType
+              })
+              .map((row) => (
                 <StyledTableRow key={row.tconst}>
                   <StyledTableCell component="th" scope="row" sx={{ width: '40%' }}>
                     <Link component={NavLink} to={`/media/${row.tconst}`}>
@@ -74,12 +75,12 @@ function TypeTable({ titleType }) {
 }
 
 export default function GenrePage() {
-  const [genres, setGenres] = useState([]);
+  const [top5type, setTop5type] = useState([{}]);
 
   useEffect(() => {
-    fetch(`http://${config.server_host}:${config.server_port}/distinct_genres`)
+    fetch(`http://${config.server_host}:${config.server_port}/top1000/2022`)
       .then(res => res.json())
-      .then(resJson => setGenres(resJson));
+      .then(resJson => setTop5type(resJson));
   }, []);
 
   return (
@@ -89,12 +90,15 @@ export default function GenrePage() {
         Trending for Different Genres
       </Typography>
       <Grid container spacing={4}>
-        {genres.map((type) => {
+        <TypeTable titleType={"Action"} top5type={top5type}/>
+        <TypeTable titleType={"Adventure"} top5type={top5type}/>
+        <TypeTable titleType={"Crime"} top5type={top5type}/>
+        {/* {genres.map((type) => {
           if (type.genre === "Action" || type.genre === "Adventure" || type.genre === "Crime") {
             return <TypeTable key={type.genre} titleType={type.genre} />;
           }
           return null;
-        })}
+        })} */}
       </Grid>
       
       </Container>

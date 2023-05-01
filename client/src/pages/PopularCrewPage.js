@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, Container, Autocomplete, Typography, FormControlLabel, FormGroup, Switch, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
-import { createFilterOptions } from '@mui/material/Autocomplete';
+import { Button, Container, Typography, Grid, Link, Slider} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { NavLink } from 'react-router-dom';
 
