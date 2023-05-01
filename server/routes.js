@@ -421,20 +421,14 @@ const pop_people_media = async function (req, res){
   const rating_low = req.query.startRating ?? 0;
   const rating_hi = req.query.endRating ?? 10;
   connection.query(`
-    SELECT nconst, primaryName, GROUP_CONCAT(primaryTitle SEPARATOR '; ') AS all_shows, GROUP_CONCAT(nconst SEPARATOR '; ') AS all_nconst FROM (
-    WITH actorActress AS (
-    SELECT p.nconst, p.category, nb.primaryName
-    FROM principals p JOIN name_basics nb on p.nconst = nb.nconst WHERE tconst IN(
-    SELECT titleId as tconst
-    FROM(
-    SELECT titleId, COUNT(*) as numArea FROM akas
-    GROUP BY titleId
-    ) T1
-    WHERE numArea >= 1) AND category IN ('actress', 'actor'))
-    SELECT A.*, B.tconst, mb.primaryTitle, r.averageRating FROM actorActress A JOIN principals B
-    ON A.nconst = B.nconst
-    JOIN movie_basics mb on B.tconst = mb.tconst
-    JOIN ratings r on mb.tconst = r.tconst WHERE r.averageRating >= ${rating_low} AND r.averageRating <= ${rating_hi}) A GROUP BY primaryName;
+    SELECT nb.nconst, nb.primaryName, GROUP_CONCAT(mb.primaryTitle SEPARATOR '; ') AS all_shows, GROUP_CONCAT(nb.nconst SEPARATOR '; ') AS all_nconst
+    FROM name_basics nb
+    JOIN principals p ON nb.nconst = p.nconst
+    JOIN movie_basics mb ON p.tconst = mb.tconst
+    JOIN ratings r ON mb.tconst = r.tconst
+    WHERE p.category IN ('actress', 'actor')
+    AND r.averageRating >= ${rating_low} AND r.averageRating <= ${rating_hi}
+    GROUP BY nb.primaryName;
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
