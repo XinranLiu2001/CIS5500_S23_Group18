@@ -34,7 +34,7 @@ export default function PopularCrew() {
     { field: 'primaryName', headerName: 'Name', renderCell: (params) => (
         <Link component={NavLink} to={`/crew/${params.row.nconst}`} color="secondary" style={{ color: '#FFA000' }} >{params.value}</Link>
     ), flex: 1, headerClassName:'cell12',},
-    { field: 'all_shows', headerName: 'Shows' , headerClassName:'cell12', flex: 1, renderCell: (params) => {
+    { field: 'all_shows', headerName: 'Shows' , headerClassName:'cell12', flex: 3, renderCell: (params) => {
       const all_shows = params.row.all_shows;
       const all_nconst = params.row.all_nconst;
       const show_split = all_shows.split("; ");
@@ -58,7 +58,7 @@ export default function PopularCrew() {
           }
       }
       return <>{links}</>;
-    }, flex: 3},
+    }},
   ]
 
   return (
