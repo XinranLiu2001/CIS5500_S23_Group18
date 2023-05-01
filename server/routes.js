@@ -450,7 +450,7 @@ const search_crew_info = async function (req, res){
 
   if(isDead === 1){
     connection.query(`
-      SELECT nconst, primaryName, birthYear, 1 AS dead FROM name_basics
+      SELECT nconst, primaryName, birthYear, 1 AS dead, primaryProfession FROM name_basics
       WHERE primaryProfession LIKE '%${profession1}%' AND primaryProfession LIKE '%${profession2}%' AND primaryProfession LIKE '%${profession3}%'
       AND primaryName LIKE '%${search_text}%'
       AND deathYear IS NOT NULL
@@ -466,7 +466,7 @@ const search_crew_info = async function (req, res){
       });
   } else {
       connection.query(`
-      SELECT nconst, primaryName, birthYear, IF(deathYear IS NULL, 0, 1) AS dead FROM name_basics
+      SELECT nconst, primaryName, birthYear, IF(deathYear IS NULL, 0, 1) AS dead, primaryProfession FROM name_basics
       WHERE primaryProfession LIKE '%${profession1}%' AND primaryProfession LIKE '%${profession2}%' AND primaryProfession LIKE '%${profession3}%'
       AND primaryName LIKE '%${search_text}%'
       AND birthYear >= ${startYear}

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, Container, Autocomplete, Typography, FormControlLabel, FormGroup, Switch, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
-import { createFilterOptions } from '@mui/material/Autocomplete';
+import { Button, Container, Autocomplete, Typography, FormControlLabel, FormGroup, Switch, Grid, Link, Slider, TextField} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { NavLink } from 'react-router-dom';
 
@@ -69,13 +68,14 @@ export default function SearchPage() {
   const columns = [
     { field: 'primaryName', headerName: 'Name', renderCell: (params) => (
         <Link component={NavLink} to={`/crew/${params.row.nconst}`} color="secondary" style={{ color: '#FFA000' }} >{params.value}</Link>
-    ), flex: 3, headerClassName:'cell12',},
+    ), flex: 2, headerClassName:'cell12',},
     { field: 'birthYear', headerName: 'Birth Year' , headerClassName:'cell12', flex: 1},
     { field: 'dead', headerName: 'Dead' , headerClassName:'cell12', flex: 1, cellClassName: (params) => {
         const type = params.value;
-        if(type === 1) return 'cell1';
-        return 'cell5';
+        if(type === 1) return 'cell5';
+        return 'cell1';
     },},
+    {field: 'primaryProfession', headerName: 'Professions' , headerClassName:'cell12', flex: 2}
   ]
 
   return (

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, Autocomplete, FormGroup, Switch, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField, Radio, RadioGroup} from '@mui/material';
-import { createFilterOptions } from '@mui/material/Autocomplete';
+import { Button, Autocomplete, FormGroup, Switch, Container, Typography, FormControlLabel, Grid, Link, Slider, TextField} from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { NavLink } from 'react-router-dom';
 
@@ -84,9 +83,9 @@ export default function SearchPage() {
   const columns = [
     { field: 'primaryTitle', headerName: 'Title', renderCell: (params) => (
         <Link component={NavLink} to={`/media/${params.row.tconst}`} color="secondary" style={{ color: '#FFA000' }}>{params.value}</Link>
-    ), flex:3, headerClassName:'cell12'},
+    ), flex:4, headerClassName:'cell12'},
     { field: 'startYear', headerName: 'Years', flex: 1, headerClassName:'cell12' },
-    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 1.5, headerClassName:'cell12'},
+    { field: 'runtimeMinutes', headerName: 'Length (in Minutes)', flex: 2, headerClassName:'cell12'},
     { field: 'titleType', headerName: 'Type', flex:1, headerClassName:'cell12', cellClassName: (params) => {
       const type = params.value;
       switch (type) {
@@ -106,19 +105,21 @@ export default function SearchPage() {
           return 'cell7';
         case 'tvEpisode':
           return 'cell8';
-        case 'tvSeries':
-          return 'cell9';
         case 'tvShort':
-          return 'cell10';
+          return 'cell9';
         case 'video':
-          return 'cell11';
+          return 'cell10';
         case 'videoGame':
-          return 'cell12';
+          return 'cell11';
         default:
           return 'cell12';
       }
     },},
-    { field: 'isAdult', headerName: 'Adult', headerClassName:'cell12', flex:1},
+    { field: 'isAdult', headerName: 'Adult', headerClassName:'cell12', flex:1, cellClassName: (params) => {
+      const type = params.value;
+      if(type === 1) return 'cell1';
+      return 'cell5';
+    },},
     { field: 'genres', headerName: 'Genre', headerClassName:'cell12', flex:2}
   ]
 
