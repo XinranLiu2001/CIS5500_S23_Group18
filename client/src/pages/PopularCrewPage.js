@@ -94,7 +94,7 @@ export default function PopularCrew() {
       <h2>Results</h2>
       <DataGrid
         rows={data}
-        getRowId={(row) => row.id}
+        // getRowId={(row) => row.id}
         columns={columns}
         pageSize={pageSize}
         rowsPerPageOptions={[5, 10, 25]}
