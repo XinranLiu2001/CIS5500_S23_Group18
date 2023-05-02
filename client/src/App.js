@@ -31,12 +31,12 @@ export default function App() {
       <BrowserRouter>
         <NavBar />
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<GenrePage />} />
           <Route path="/search_video" element={<SearchPage />}/>
           <Route path="/search_crew" element={<SearchCrewPage />}/>
           <Route path="/crew/:crewid" element={<CrewPage />}/>
           <Route path="/media/:mediaid" element={<MediaPage />}/>
-          <Route path="/genres" element={<GenrePage />}/>
+          <Route path="/types" element={<HomePage />}/>
           <Route path="/pop_people" element={<PopularCrewPage />}/>
         </Routes>
       </BrowserRouter>

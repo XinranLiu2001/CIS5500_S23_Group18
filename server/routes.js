@@ -359,20 +359,9 @@ const get_top1000 = async function (req, res){
   const year = req.params.year
   // const genre = req.params.genre
   connection.query(`
-    SELECT rs.tconst, rs.title, rs.titleType, rs.startYear, rs.runtimeMinutes, rs.genre As genre, rs.averageRating, dd.director AS directors
-    FROM rs
-    JOIN(SELECT tconst, GROUP_CONCAT(primaryName) AS director FROM(
-    SELECT D.*, nb.primaryName FROM
-    (SELECT crew.tconst, SUBSTRING_INDEX(directors, ',', 1) AS director_id
-    FROM crew
-    UNION
-    SELECT crew.tconst, SUBSTRING_INDEX(SUBSTRING_INDEX(directors, ',', 2), ',', -1) AS director_id
-    FROM crew) D
-    JOIN name_basics nb ON D.director_id = nb.nconst
-    WHERE D.director_id IS NOT NULL) L
-    GROUP BY tconst) dd
-    ON rs.tconst = dd.tconst
-    WHERE rs.rn <= 5 AND rs.genre IN ('Adventure', 'Crime', 'Action') AND rs.startYear = ${year};
+  SELECT *
+  FROM top_1000_view
+  WHERE top_1000_view.startYear = ${year};
   `, (err, data) => {
     if(err || data.length === 0){
       console.log(err);
@@ -382,7 +371,7 @@ const get_top1000 = async function (req, res){
     }
   });
 }
- 
+
 // Route 10: GET /pop_people_media
 const pop_people_media = async function (req, res){
   const rating_low = req.query.startRating ?? 0;
