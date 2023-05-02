@@ -18,7 +18,8 @@ connection.connect((err) => err && console.log(err));
 
 //Route 1: GET /filter_movie
 const filter_movie = async function (req, res){
-  const search_text = req.query.search_text ?? '';
+  const text = req.query.search_text ?? '';
+  const search_text = text.toLowerCase();
   const isAdult = req.query.isAdult === 'true' ? 1 : 0;
   const startYear = req.query.startYear ?? 1888
   const endYear = req.query.endYear ?? 2030
@@ -57,7 +58,7 @@ const filter_movie = async function (req, res){
 
         SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
         WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
-        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND (LOWER(primaryTitle) LIKE '%${search_text}%' OR LOWER(otherTitles) LIKE '%${search_text}%')
         AND isAdult = ${isAdult}
         AND startYear >= ${startYear}
         AND startYear <= ${endYear}
@@ -81,7 +82,7 @@ const filter_movie = async function (req, res){
 
         SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
         WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
-        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND (LOWER(primaryTitle) LIKE '%${search_text}%' OR LOWER(otherTitles) LIKE '%${search_text}%')
         AND startYear >= ${startYear}
         AND startYear <= ${endYear}
         AND runtimeMinutes >= ${runtimeMinutesLow}
@@ -105,7 +106,7 @@ const filter_movie = async function (req, res){
 
         SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
         WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
-        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND (LOWER(primaryTitle) LIKE '%${search_text}%' OR LOWER(otherTitles) LIKE '%${search_text}%')
         AND titleType = '${type}'
         AND isAdult = ${isAdult}
         AND startYear >= ${startYear}
@@ -129,7 +130,7 @@ const filter_movie = async function (req, res){
 
         SELECT tconst, primaryTitle, startYear, runtimeMinutes, genres, titleType, isAdult FROM tmp_table
         WHERE genres LIKE '%${genre1}%' AND genres LIKE '%${genre2}%' AND genres LIKE '%${genre3}%'
-        AND (primaryTitle LIKE '%${search_text}%' OR otherTitles LIKE '%${search_text}%')
+        AND (LOWER(primaryTitle) LIKE '%${search_text}%' OR LOWER(otherTitles) LIKE '%${search_text}%')
         AND titleType = '${type}'
         AND startYear >= ${startYear}
         AND startYear <= ${endYear}
@@ -387,7 +388,7 @@ const pop_people_media = async function (req, res){
   const rating_low = req.query.startRating ?? 0;
   const rating_hi = req.query.endRating ?? 10;
   connection.query(`
-    SELECT nb.nconst, nb.primaryName, GROUP_CONCAT(mb.primaryTitle SEPARATOR '; ') AS all_shows, GROUP_CONCAT(nb.nconst SEPARATOR '; ') AS all_nconst
+    SELECT nb.nconst, nb.primaryName, GROUP_CONCAT(mb.primaryTitle SEPARATOR '; ') AS all_shows, GROUP_CONCAT(mb.tconst SEPARATOR '; ') AS all_nconst
     FROM name_basics nb
     JOIN principals p ON nb.nconst = p.nconst
     JOIN movie_basics mb ON p.tconst = mb.tconst

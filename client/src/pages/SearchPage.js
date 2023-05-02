@@ -68,7 +68,7 @@ export default function SearchPage() {
   const search = () => {
     // const genreStr = checkedGenres.join(",");
     const genreStr = selectedGenres.join(",");
-    fetch(`http://${config.server_host}:${config.server_port}/filter_movie?title=${title}` +
+    fetch(`http://${config.server_host}:${config.server_port}/filter_movie?search_text=${title}` +
       `&startYear=${year[0]}&endYear=${year[1]}` +
       `&runtimeMinutesLow=${runtimeMinutes[0]}&runtimeMinutesHigh=${runtimeMinutes[1]}` +
       `&isAdult=${isAdult}&type=${type}&genres=${genreStr}`
@@ -135,7 +135,7 @@ export default function SearchPage() {
       </Typography>
       <Grid container spacing={4}>
         <Grid item xs={8}>
-          <TextField label="Search for a video's title or akas" value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
+          <TextField label="Search for a video's title or akas" value={title} color='secondary' onChange={(e) => setTitle(e.target.value)} style={{ width: "100%" }}/>
         </Grid>
         <Grid item xs={4}>
         <Button color="secondary" onClick={() => search() } variant="contained" style={{ left: '50%', transform: 'translateX(-50%)' }}>

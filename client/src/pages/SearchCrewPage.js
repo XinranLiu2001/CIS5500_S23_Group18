@@ -89,7 +89,7 @@ export default function SearchPage() {
     </Typography>
     <Grid container spacing={4} justifyContent="center">
         <Grid item xs={8}>
-            <TextField label='Name' value={name} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%"}}/>
+            <TextField label='Name' color ='secondary' value={name} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%"}}/>
         </Grid>
         <Grid item xs = {8}>
             <Link component={NavLink} to={`/pop_people`} color="secondary" style={{ color: '#FFA000' }} >Want to see some popular actors/actresses in the industry?</Link>
